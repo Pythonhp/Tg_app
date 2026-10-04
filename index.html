@@ -3,70 +3,675 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Моя Игра</title>
-    <!-- Подключаем скрипт Telegram -->
+    <title>Финансовая Копилка</title>
+    <!-- Подключаем Telegram WebApp SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
+        :root {
+            --bg-color: var(--tg-theme-bg-color, #121212);
+            --secondary-bg: var(--tg-theme-secondary-bg-color, #1e1e1e);
+            --text-color: var(--tg-theme-text-color, #ffffff);
+            --hint-color: var(--tg-theme-hint-color, #aaaaaa);
+            --accent-color: var(--tg-theme-button-color, #248232);
+            --accent-text: var(--tg-theme-button-text-color, #ffffff);
+            --income-color: #2ec4b6;
+            --expense-color: #e71d36;
+            --card-bg: #252525;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            background-color: var(--tg-theme-bg-color, #1a1a1a);
-            color: var(--tg-theme-text-color, #ffffff);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding-bottom: 70px;
+            user-select: none;
+        }
+
+        .header {
+            background-color: var(--secondary-bg);
+            padding: 20px;
+            text-align: center;
+            border-bottom-left-radius: 20px;
+            border-bottom-right-radius: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        .balance-title {
+            font-size: 14px;
+            color: var(--hint-color);
+            margin-bottom: 5px;
+        }
+
+        .balance-amount {
+            font-size: 32px;
+            font-weight: bold;
+        }
+
+        .page {
+            display: none;
+            padding: 15px;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Формы и поля ввода */
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        label {
+            display: block;
+            font-size: 12px;
+            color: var(--hint-color);
+            margin-bottom: 4px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid #333;
+            background-color: #1a1a1a;
+            color: #fff;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px;
+            border-radius: 10px;
+            border: none;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        .btn:active {
+            transform: scale(0.97);
+        }
+
+        .btn-income {
+            background-color: var(--income-color);
+            color: #000;
+        }
+
+        .btn-expense {
+            background-color: var(--expense-color);
+            color: #fff;
+        }
+
+        .btn-primary {
+            background-color: var(--accent-color);
+            color: var(--accent-text);
+            width: 100%;
+        }
+
+        /* Списки транзакций */
+        .list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #333;
+        }
+
+        .list-item:last-child {
+            border-bottom: none;
+        }
+
+        .item-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .item-title {
+            font-size: 15px;
+            font-weight: 500;
+        }
+
+        .item-sub {
+            font-size: 12px;
+            color: var(--hint-color);
+            margin-top: 2px;
+        }
+
+        .item-amount {
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .amount-income { color: var(--income-color); }
+        .amount-expense { color: var(--expense-color); }
+
+        /* Прогресс бар для целей */
+        .progress-bar-bg {
+            background-color: #333;
+            height: 10px;
+            border-radius: 5px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-bar-fill {
+            background-color: var(--income-color);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        /* Нижняя панель навигации */
+        .navbar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background-color: var(--secondary-bg);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            border-top: 1px solid #2a2a2a;
+            z-index: 100;
+        }
+
+        .nav-item {
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-            user-select: none;
+            color: var(--hint-color);
+            font-size: 11px;
+            cursor: pointer;
+            text-decoration: none;
+            width: 33%;
         }
-        .card {
-            text-align: center;
-            padding: 20px;
+
+        .nav-item.active {
+            color: #2ec4b6;
         }
-        #click-btn {
-            background-color: #0088cc;
-            color: white;
-            border: none;
-            padding: 15px 30px;
+
+        .nav-icon {
             font-size: 20px;
-            border-radius: 12px;
-            margin-top: 20px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            margin-bottom: 2px;
         }
-        #click-btn:active {
-            transform: scale(0.95);
+
+        /* Фильтр периодов */
+        .period-filter {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+            overflow-x: auto;
+        }
+
+        .period-btn {
+            padding: 8px 14px;
+            border-radius: 20px;
+            background-color: var(--card-bg);
+            color: var(--hint-color);
+            border: none;
+            font-size: 12px;
+            white-space: nowrap;
+        }
+
+        .period-btn.active {
+            background-color: #2ec4b6;
+            color: #000;
+            font-weight: bold;
+        }
+
+        .goal-history {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px dashed #444;
+            display: none;
+        }
+
+        .goal-history.open {
+            display: block;
+        }
+
+        .toggle-history-btn {
+            font-size: 12px;
+            color: #2ec4b6;
+            background: none;
+            border: none;
+            cursor: pointer;
+            margin-top: 5px;
         }
     </style>
 </head>
 <body>
-    <div class="card">
-        <h1 id="user-greeting">Привет, Игрок!</h1>
-        <p>Счет: <strong id="score">0</strong></p>
-        <button id="click-btn">Нажми меня!</button>
+
+    <!-- Шапка приложения -->
+    <div class="header">
+        <div class="balance-title">Текущий баланс</div>
+        <div class="balance-amount" id="total-balance">0 ₽</div>
+    </div>
+
+    <!-- Страница 1: Главная (Копилка & Транзакции) -->
+    <div id="page-home" class="page active">
+        <div class="card">
+            <div class="card-title">Добавить операцию</div>
+            <div class="form-group">
+                <label>Сумма (₽)</label>
+                <input type="number" id="trans-amount" placeholder="Например: 500" inputmode="decimal">
+            </div>
+            <div class="form-group">
+                <label>Категория</label>
+                <select id="trans-category">
+                    <option value="Еда и продукты">Еда и продукты</option>
+                    <option value="Зарплата/Доход">Зарплата / Доход</option>
+                    <option value="Развлечения">Развлечения</option>
+                    <option value="Транспорт">Транспорт</option>
+                    <option value="Покупки">Покупки</option>
+                    <option value="Другое">Другое</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Комментарий (необязательно)</label>
+                <input type="text" id="trans-comment" placeholder="Например: Поход в кино">
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-income" onclick="addTransaction('income')">+ Доход</button>
+                <button class="btn btn-expense" onclick="addTransaction('expense')">- Расход</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">История операций</div>
+            <div id="transactions-list">
+                <div style="text-align: center; color: var(--hint-color); padding: 10px;">История пуста</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Страница 2: Цели накоплений -->
+    <div id="page-goals" class="page">
+        <div class="card">
+            <div class="card-title">Новая цель</div>
+            <div class="form-group">
+                <label>Название цели</label>
+                <input type="text" id="goal-title" placeholder="Например: Новый телефон">
+            </div>
+            <div class="form-group">
+                <label>Целевая сумма (₽)</label>
+                <input type="number" id="goal-target" placeholder="Например: 50000" inputmode="decimal">
+            </div>
+            <button class="btn btn-primary" onclick="createGoal()">Создать цель</button>
+        </div>
+
+        <div id="goals-list"></div>
+    </div>
+
+    <!-- Страница 3: Статистика -->
+    <div id="page-stats" class="page">
+        <div class="period-filter">
+            <button class="period-btn active" onclick="setPeriod('all', this)">Всё время</button>
+            <button class="period-btn" onclick="setPeriod('month', this)">За месяц</button>
+            <button class="period-btn" onclick="setPeriod('week', this)">За неделю</button>
+            <button class="period-btn" onclick="setPeriod('today', this)">Сегодня</button>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Обзор за период</div>
+            <div class="list-item">
+                <span>Доходы:</span>
+                <span class="amount-income" id="stat-income">0 ₽</span>
+            </div>
+            <div class="list-item">
+                <span>Расходы:</span>
+                <span class="amount-expense" id="stat-expense">0 ₽</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Расходы по категориям</div>
+            <div id="category-stats-list">
+                <div style="text-align: center; color: var(--hint-color); padding: 10px;">Нет данных</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Нижняя навигационная панель -->
+    <div class="navbar">
+        <div class="nav-item active" onclick="switchPage('home', this)">
+            <span class="nav-icon">🐷</span>
+            <span>Копилка</span>
+        </div>
+        <div class="nav-item" onclick="switchPage('goals', this)">
+            <span class="nav-icon">🎯</span>
+            <span>Цели</span>
+        </div>
+        <div class="nav-item" onclick="switchPage('stats', this)">
+            <span class="nav-icon">📊</span>
+            <span>Статистика</span>
+        </div>
     </div>
 
     <script>
         // Инициализация Telegram WebApp
         const tg = window.Telegram.WebApp;
-        tg.expand(); // Разворачиваем на весь экран
+        tg.expand();
 
-        // Берем имя пользователя из Telegram, если доступно
-        if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-            document.getElementById('user-greeting').innerText = `Привет, ${tg.initDataUnsafe.user.first_name}!`;
+        // Базовое состояние данных
+        let state = {
+            transactions: [],
+            goals: []
+        };
+
+        let currentPeriod = 'all';
+
+        // Загрузка данных из локального хранилища
+        function loadData() {
+            const saved = localStorage.getItem('piggy_app_data');
+            if (saved) {
+                state = JSON.parse(saved);
+            }
+            updateUI();
         }
 
-        let score = 0;
-        const scoreEl = document.getElementById('score');
-        const btn = document.getElementById('click-btn');
+        // Сохранение данных
+        function saveData() {
+            localStorage.setItem('piggy_app_data', JSON.stringify(state));
+            updateUI();
+        }
 
-        btn.addEventListener('click', () => {
-            score++;
-            scoreEl.innerText = score;
-            // Легкая вибрация телефона при клике
+        function triggerVibration() {
             if (tg.HapticFeedback) {
                 tg.HapticFeedback.impactOccurred('light');
             }
-        });
+        }
+
+        // Переключение страниц
+        function switchPage(pageId, el) {
+            triggerVibration();
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            
+            document.getElementById(`page-${pageId}`).classList.add('active');
+            el.classList.add('active');
+
+            if (pageId === 'stats') {
+                renderStats();
+            }
+        }
+
+        // Расчет и обновление интерфейса
+        function updateUI() {
+            let totalIncome = 0;
+            let totalExpense = 0;
+
+            state.transactions.forEach(t => {
+                if (t.type === 'income') totalIncome += t.amount;
+                else totalExpense += t.amount;
+            });
+
+            // Вычитаем сумму, отложенную в цели
+            let totalGoalSavings = 0;
+            state.goals.forEach(g => {
+                totalGoalSavings += (g.current || 0);
+            });
+
+            const currentBalance = totalIncome - totalExpense - totalGoalSavings;
+            document.getElementById('total-balance').innerText = `${currentBalance.toLocaleString()} ₽`;
+
+            renderTransactions();
+            renderGoals();
+        }
+
+        // Добавление транзакции
+        function addTransaction(type) {
+            const amountInput = document.getElementById('trans-amount');
+            const categorySelect = document.getElementById('trans-category');
+            const commentInput = document.getElementById('trans-comment');
+
+            const amount = parseFloat(amountInput.value);
+            if (!amount || amount <= 0) {
+                alert('Введите корректную сумму!');
+                return;
+            }
+
+            const transaction = {
+                id: Date.now(),
+                type: type,
+                amount: amount,
+                category: categorySelect.value,
+                comment: commentInput.value.trim(),
+                date: new Date().toISOString()
+            };
+
+            state.transactions.unshift(transaction);
+            saveData();
+            triggerVibration();
+
+            amountInput.value = '';
+            commentInput.value = '';
+        }
+
+        // Отрисовка списка транзакций
+        function renderTransactions() {
+            const list = document.getElementById('transactions-list');
+            if (state.transactions.length === 0) {
+                list.innerHTML = '<div style="text-align: center; color: var(--hint-color); padding: 10px;">История пуста</div>';
+                return;
+            }
+
+            list.innerHTML = state.transactions.slice(0, 15).map(t => {
+                const dateStr = new Date(t.date).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
+                const isIncome = t.type === 'income';
+                return `
+                    <div class="list-item">
+                        <div class="item-info">
+                            <span class="item-title">${t.category}</span>
+                            <span class="item-sub">${t.comment ? t.comment + ' • ' : ''}${dateStr}</span>
+                        </div>
+                        <span class="item-amount ${isIncome ? 'amount-income' : 'amount-expense'}">
+                            ${isIncome ? '+' : '-'}${t.amount.toLocaleString()} ₽
+                        </span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Создание цели
+        function createGoal() {
+            const titleInput = document.getElementById('goal-title');
+            const targetInput = document.getElementById('goal-target');
+
+            const title = titleInput.value.trim();
+            const target = parseFloat(targetInput.value);
+
+            if (!title || !target || target <= 0) {
+                alert('Заполните название и целевую сумму!');
+                return;
+            }
+
+            const goal = {
+                id: Date.now(),
+                title: title,
+                target: target,
+                current: 0,
+                history: []
+            };
+
+            state.goals.push(goal);
+            saveData();
+            triggerVibration();
+
+            titleInput.value = '';
+            targetInput.value = '';
+        }
+
+        // Пополнение цели
+        function depositGoal(goalId) {
+            const amountStr = prompt('Какую сумму вы хотите отложить в эту цель (₽)?');
+            const amount = parseFloat(amountStr);
+
+            if (!amount || amount <= 0) return;
+
+            const goal = state.goals.find(g => g.id === goalId);
+            if (goal) {
+                goal.current = (goal.current || 0) + amount;
+                goal.history.unshift({
+                    amount: amount,
+                    date: new Date().toISOString()
+                });
+                saveData();
+                triggerVibration();
+            }
+        }
+
+        // Переключатель видимости истории пополнений цели
+        function toggleGoalHistory(goalId) {
+            const el = document.getElementById(`goal-history-${goalId}`);
+            if (el) {
+                el.classList.toggle('open');
+            }
+        }
+
+        // Отрисовка списка целей
+        function renderGoals() {
+            const container = document.getElementById('goals-list');
+            if (state.goals.length === 0) {
+                container.innerHTML = '<div style="text-align: center; color: var(--hint-color); padding: 15px;">У вас пока нет активных целей</div>';
+                return;
+            }
+
+            container.innerHTML = state.goals.map(g => {
+                const percent = Math.min(100, Math.round((g.current / g.target) * 100));
+                
+                const historyItems = (g.history && g.history.length > 0) 
+                    ? g.history.map(h => `
+                        <div class="list-item" style="padding: 6px 0;">
+                            <span class="item-sub">${new Date(h.date).toLocaleDateString('ru-RU')}</span>
+                            <span class="amount-income">+${h.amount.toLocaleString()} ₽</span>
+                        </div>
+                    `).join('')
+                    : '<div class="item-sub">Пополнений еще не было</div>';
+
+                return `
+                    <div class="card">
+                        <div class="card-title">
+                            <span>🎯 ${g.title}</span>
+                            <span>${percent}%</span>
+                        </div>
+                        <div style="font-size: 14px; color: var(--hint-color);">
+                            Накоплено ${g.current.toLocaleString()} из ${g.target.toLocaleString()} ₽
+                        </div>
+                        <div class="progress-bar-bg">
+                            <div class="progress-bar-fill" style="width: ${percent}%;"></div>
+                        </div>
+                        <button class="btn btn-primary" style="margin-top: 10px;" onclick="depositGoal(${g.id})">Пополнить цель</button>
+                        
+                        <button class="toggle-history-btn" onclick="toggleGoalHistory(${g.id})">
+                            📜 История пополнений цели (${g.history ? g.history.length : 0})
+                        </button>
+                        <div class="goal-history" id="goal-history-${g.id}">
+                            ${historyItems}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Фильтрация статистики по периоду
+        function setPeriod(period, btn) {
+            currentPeriod = period;
+            document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            triggerVibration();
+            renderStats();
+        }
+
+        // Расчет статистики
+        function renderStats() {
+            const now = new Date();
+            let filtered = state.transactions.filter(t => {
+                const tDate = new Date(t.date);
+                if (currentPeriod === 'today') {
+                    return tDate.toDateString() === now.toDateString();
+                } else if (currentPeriod === 'week') {
+                    const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                    return tDate >= weekAgo;
+                } else if (currentPeriod === 'month') {
+                    return tDate.getMonth() === now.getMonth() && tDate.getFullYear() === now.getFullYear();
+                }
+                return true; // 'all'
+            });
+
+            let income = 0;
+            let expense = 0;
+            let categories = {};
+
+            filtered.forEach(t => {
+                if (t.type === 'income') {
+                    income += t.amount;
+                } else {
+                    expense += t.amount;
+                    categories[t.category] = (categories[t.category] || 0) + t.amount;
+                }
+            });
+
+            document.getElementById('stat-income').innerText = `+${income.toLocaleString()} ₽`;
+            document.getElementById('stat-expense').innerText = `-${expense.toLocaleString()} ₽`;
+
+            const catList = document.getElementById('category-stats-list');
+            const catKeys = Object.keys(categories);
+
+            if (catKeys.length === 0) {
+                catList.innerHTML = '<div style="text-align: center; color: var(--hint-color); padding: 10px;">За этот период расходов не было</div>';
+                return;
+            }
+
+            catList.innerHTML = catKeys.map(cat => {
+                const amt = categories[cat];
+                const pct = expense > 0 ? Math.round((amt / expense) * 100) : 0;
+                return `
+                    <div class="list-item">
+                        <div class="item-info">
+                            <span class="item-title">${cat}</span>
+                            <span class="item-sub">${pct}% от всех расходов</span>
+                        </div>
+                        <span class="item-amount amount-expense">-${amt.toLocaleString()} ₽</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Запуск при открытии
+        loadData();
     </script>
 </body>
 </html>
