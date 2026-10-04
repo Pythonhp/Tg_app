@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Финансовая Копилка</title>
-    <!-- Подключаем Telegram WebApp SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
@@ -12,11 +11,12 @@
             --secondary-bg: var(--tg-theme-secondary-bg-color, #1e1e1e);
             --text-color: var(--tg-theme-text-color, #ffffff);
             --hint-color: var(--tg-theme-hint-color, #aaaaaa);
-            --accent-color: var(--tg-theme-button-color, #248232);
-            --accent-text: var(--tg-theme-button-text-color, #ffffff);
+            --accent-color: #248232;
+            --accent-text: #ffffff;
             --income-color: #2ec4b6;
             --expense-color: #e71d36;
-            --card-bg: #252525;
+            --card-bg: rgba(37, 37, 37, 0.85);
+            --currency-symbol: '₽';
         }
 
         * {
@@ -29,28 +29,34 @@
 
         body {
             background-color: var(--bg-color);
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
             color: var(--text-color);
-            padding-bottom: 70px;
+            min-height: 100vh;
             user-select: none;
+            position: relative;
         }
 
+        /* Шапка */
         .header {
             background-color: var(--secondary-bg);
-            padding: 20px;
+            padding: 18px;
             text-align: center;
             border-bottom-left-radius: 20px;
             border-bottom-right-radius: 20px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            backdrop-filter: blur(8px);
         }
 
         .balance-title {
-            font-size: 14px;
+            font-size: 13px;
             color: var(--hint-color);
-            margin-bottom: 5px;
+            margin-bottom: 4px;
         }
 
         .balance-amount {
-            font-size: 32px;
+            font-size: 30px;
             font-weight: bold;
         }
 
@@ -68,11 +74,13 @@
             border-radius: 16px;
             padding: 16px;
             margin-bottom: 15px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            backdrop-filter: blur(10px);
+            position: relative;
         }
 
         .card-title {
-            font-size: 18px;
+            font-size: 17px;
             font-weight: 600;
             margin-bottom: 12px;
             display: flex;
@@ -80,7 +88,6 @@
             align-items: center;
         }
 
-        /* Формы и поля ввода */
         .form-group {
             margin-bottom: 12px;
         }
@@ -94,10 +101,10 @@
 
         input, select {
             width: 100%;
-            padding: 12px;
+            padding: 11px;
             border-radius: 10px;
-            border: 1px solid #333;
-            background-color: #1a1a1a;
+            border: 1px solid rgba(255,255,255,0.1);
+            background-color: rgba(20, 20, 20, 0.6);
             color: #fff;
             font-size: 14px;
             outline: none;
@@ -116,11 +123,11 @@
             font-weight: bold;
             font-size: 14px;
             cursor: pointer;
-            transition: transform 0.1s;
+            transition: transform 0.1s, opacity 0.2s;
         }
 
         .btn:active {
-            transform: scale(0.97);
+            transform: scale(0.96);
         }
 
         .btn-income {
@@ -139,13 +146,13 @@
             width: 100%;
         }
 
-        /* Списки транзакций */
+        /* Список операций */
         .list-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px solid #333;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
         }
 
         .list-item:last-child {
@@ -158,31 +165,31 @@
         }
 
         .item-title {
-            font-size: 15px;
+            font-size: 14px;
             font-weight: 500;
         }
 
         .item-sub {
-            font-size: 12px;
+            font-size: 11px;
             color: var(--hint-color);
             margin-top: 2px;
         }
 
         .item-amount {
-            font-size: 16px;
+            font-size: 15px;
             font-weight: bold;
         }
 
         .amount-income { color: var(--income-color); }
         .amount-expense { color: var(--expense-color); }
 
-        /* Прогресс бар для целей */
+        /* Прогресс бар целей */
         .progress-bar-bg {
-            background-color: #333;
-            height: 10px;
-            border-radius: 5px;
+            background-color: rgba(255,255,255,0.1);
+            height: 8px;
+            border-radius: 4px;
             overflow: hidden;
-            margin: 10px 0;
+            margin: 8px 0;
         }
 
         .progress-bar-fill {
@@ -192,52 +199,144 @@
             transition: width 0.3s;
         }
 
-        /* Нижняя панель навигации */
-        .navbar {
+        /* Левая выплывающая панель (Sidebar) */
+        .sidebar-toggle-btn {
             position: fixed;
-            bottom: 0;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.4);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-left: none;
+            padding: 12px 6px;
+            border-top-right-radius: 12px;
+            border-bottom-right-radius: 12px;
+            cursor: pointer;
+            z-index: 1001;
+            opacity: 0.6;
+            backdrop-filter: blur(5px);
+            font-size: 14px;
+        }
+
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
             left: 0;
             right: 0;
-            height: 60px;
-            background-color: var(--secondary-bg);
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            border-top: 1px solid #2a2a2a;
-            z-index: 100;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1002;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s;
         }
 
-        .nav-item {
+        .sidebar-overlay.active {
+            display: block;
+            opacity: 1;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 50%;
+            left: 0;
+            transform: translateY(-50%) translateX(-100%);
+            background: var(--secondary-bg);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-left: none;
+            border-top-right-radius: 20px;
+            border-bottom-right-radius: 20px;
+            padding: 15px;
+            z-index: 1003;
+            width: max-content;
+            max-width: 220px;
+            box-shadow: 5px 0 20px rgba(0,0,0,0.5);
+            transition: transform 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);
+        }
+
+        .sidebar.open {
+            transform: translateY(-50%) translateX(0);
+        }
+
+        .sidebar-menu {
             display: flex;
             flex-direction: column;
+            gap: 8px;
+        }
+
+        .sidebar-item {
+            display: flex;
             align-items: center;
-            color: var(--hint-color);
-            font-size: 11px;
+            gap: 10px;
+            padding: 10px 14px;
+            border-radius: 12px;
+            color: var(--text-color);
+            font-size: 14px;
+            font-weight: 500;
             cursor: pointer;
-            text-decoration: none;
-            width: 33%;
+            background: transparent;
+            transition: background 0.2s;
         }
 
-        .nav-item.active {
-            color: #2ec4b6;
+        .sidebar-item.active {
+            background-color: var(--accent-color);
+            color: var(--accent-text);
         }
 
-        .nav-icon {
-            font-size: 20px;
-            margin-bottom: 2px;
+        /* Сообщение об отсутствии целей */
+        .no-goals-banner {
+            margin-top: 10px;
+            background: rgba(40, 40, 40, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 12px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
         }
 
-        /* Фильтр периодов */
+        .no-goals-banner .close-btn {
+            position: absolute;
+            top: 6px;
+            right: 10px;
+            color: #888;
+            font-size: 16px;
+            cursor: pointer;
+            padding: 2px 6px;
+        }
+
+        .no-goals-text {
+            font-size: 13px;
+            color: var(--hint-color);
+            padding-right: 18px;
+        }
+
+        .no-goals-btn {
+            background-color: var(--accent-color);
+            color: var(--accent-text);
+            border: none;
+            padding: 8px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            align-self: flex-start;
+        }
+
+        /* Фильтры и статистика */
         .period-filter {
             display: flex;
-            gap: 8px;
-            margin-bottom: 15px;
+            gap: 6px;
+            margin-bottom: 12px;
             overflow-x: auto;
         }
 
         .period-btn {
-            padding: 8px 14px;
-            border-radius: 20px;
+            padding: 6px 12px;
+            border-radius: 16px;
             background-color: var(--card-bg);
             color: var(--hint-color);
             border: none;
@@ -246,15 +345,15 @@
         }
 
         .period-btn.active {
-            background-color: #2ec4b6;
-            color: #000;
+            background-color: var(--accent-color);
+            color: var(--accent-text);
             font-weight: bold;
         }
 
         .goal-history {
-            margin-top: 10px;
-            padding-top: 10px;
-            border-top: 1px dashed #444;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px dashed rgba(255,255,255,0.1);
             display: none;
         }
 
@@ -263,34 +362,76 @@
         }
 
         .toggle-history-btn {
-            font-size: 12px;
-            color: #2ec4b6;
+            font-size: 11px;
+            color: var(--income-color);
             background: none;
             border: none;
             cursor: pointer;
-            margin-top: 5px;
+            margin-top: 6px;
+        }
+
+        .color-picker-grid {
+            display: flex;
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .color-circle {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+
+        .color-circle.active {
+            border-color: #ffffff;
         }
     </style>
 </head>
 <body>
 
-    <!-- Шапка приложения -->
+    <!-- Стрелка вызова боковой панели -->
+    <button class="sidebar-toggle-btn" onclick="openSidebar()">❯</button>
+
+    <!-- Затемнение фона при открытии панели -->
+    <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+    <!-- Боковое выплывающее меню -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-menu">
+            <div class="sidebar-item active" onclick="switchPage('home', this)">
+                <span>🐷</span> <span>Копилка</span>
+            </div>
+            <div class="sidebar-item" onclick="switchPage('goals', this)">
+                <span>🎯</span> <span>Цели</span>
+            </div>
+            <div class="sidebar-item" onclick="switchPage('stats', this)">
+                <span>📊</span> <span>Статистика</span>
+            </div>
+            <div class="sidebar-item" onclick="switchPage('custom', this)">
+                <span>🎨</span> <span>Кастомизация</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Шапка -->
     <div class="header">
         <div class="balance-title">Текущий баланс</div>
         <div class="balance-amount" id="total-balance">0 ₽</div>
     </div>
 
-    <!-- Страница 1: Главная (Копилка & Транзакции) -->
+    <!-- Раздел 1: Копилка -->
     <div id="page-home" class="page active">
-        <div class="card">
+        <div class="card" id="operation-card">
             <div class="card-title">Добавить операцию</div>
             <div class="form-group">
-                <label>Сумма (₽)</label>
+                <label>Сумма</label>
                 <input type="number" id="trans-amount" placeholder="Например: 500" inputmode="decimal">
             </div>
             <div class="form-group">
                 <label>Категория</label>
-                <select id="trans-category">
+                <select id="trans-category" onchange="handleCategoryChange()">
                     <option value="Еда и продукты">Еда и продукты</option>
                     <option value="Зарплата/Доход">Зарплата / Доход</option>
                     <option value="Развлечения">Развлечения</option>
@@ -299,7 +440,15 @@
                     <option value="Другое">Другое</option>
                 </select>
             </div>
-            <div class="form-group">
+
+            <!-- Плашка отсутствия целей -->
+            <div id="no-goals-banner" class="no-goals-banner" style="display: none;">
+                <span class="close-btn" onclick="closeNoGoalsBanner()">✕</span>
+                <div class="no-goals-text">У вас пока нет поставленных целей</div>
+                <button class="no-goals-btn" onclick="goToGoalsFromBanner()">+ Добавить цель</button>
+            </div>
+
+            <div class="form-group" style="margin-top: 10px;">
                 <label>Комментарий (необязательно)</label>
                 <input type="text" id="trans-comment" placeholder="Например: Поход в кино">
             </div>
@@ -317,7 +466,7 @@
         </div>
     </div>
 
-    <!-- Страница 2: Цели накоплений -->
+    <!-- Раздел 2: Цели -->
     <div id="page-goals" class="page">
         <div class="card">
             <div class="card-title">Новая цель</div>
@@ -326,7 +475,7 @@
                 <input type="text" id="goal-title" placeholder="Например: Новый телефон">
             </div>
             <div class="form-group">
-                <label>Целевая сумма (₽)</label>
+                <label>Целевая сумма</label>
                 <input type="number" id="goal-target" placeholder="Например: 50000" inputmode="decimal">
             </div>
             <button class="btn btn-primary" onclick="createGoal()">Создать цель</button>
@@ -335,7 +484,7 @@
         <div id="goals-list"></div>
     </div>
 
-    <!-- Страница 3: Статистика -->
+    <!-- Раздел 3: Статистика -->
     <div id="page-stats" class="page">
         <div class="period-filter">
             <button class="period-btn active" onclick="setPeriod('all', this)">Всё время</button>
@@ -348,11 +497,11 @@
             <div class="card-title">Обзор за период</div>
             <div class="list-item">
                 <span>Доходы:</span>
-                <span class="amount-income" id="stat-income">0 ₽</span>
+                <span class="amount-income" id="stat-income">0</span>
             </div>
             <div class="list-item">
                 <span>Расходы:</span>
-                <span class="amount-expense" id="stat-expense">0 ₽</span>
+                <span class="amount-expense" id="stat-expense">0</span>
             </div>
         </div>
 
@@ -364,47 +513,74 @@
         </div>
     </div>
 
-    <!-- Нижняя навигационная панель -->
-    <div class="navbar">
-        <div class="nav-item active" onclick="switchPage('home', this)">
-            <span class="nav-icon">🐷</span>
-            <span>Копилка</span>
+    <!-- Раздел 4: Кастомизация -->
+    <div id="page-custom" class="page">
+        <div class="card">
+            <div class="card-title">Цвет кнопок и акцентов</div>
+            <div class="color-picker-grid">
+                <div class="color-circle active" style="background: #248232;" onclick="setThemeColor('#248232', this)"></div>
+                <div class="color-circle" style="background: #0088cc;" onclick="setThemeColor('#0088cc', this)"></div>
+                <div class="color-circle" style="background: #6c5ce7;" onclick="setThemeColor('#6c5ce7', this)"></div>
+                <div class="color-circle" style="background: #ff7675;" onclick="setThemeColor('#ff7675', this)"></div>
+                <div class="color-circle" style="background: #fdcb6e;" onclick="setThemeColor('#fdcb6e', this)"></div>
+            </div>
         </div>
-        <div class="nav-item" onclick="switchPage('goals', this)">
-            <span class="nav-icon">🎯</span>
-            <span>Цели</span>
+
+        <div class="card">
+            <div class="card-title">Валюта</div>
+            <div class="form-group">
+                <select id="currency-select" onchange="changeCurrency(this.value)">
+                    <option value="₽">Рубли (₽)</option>
+                    <option value="$">Доллары ($)</option>
+                    <option value="€">Евро (€)</option>
+                    <option value="₸">Тенге (₸)</option>
+                    <option value="₴">Гривны (₴)</option>
+                    <option value="Br">Бел. рубль (Br)</option>
+                    <option value="¥">Иена / Юань (¥)</option>
+                </select>
+            </div>
         </div>
-        <div class="nav-item" onclick="switchPage('stats', this)">
-            <span class="nav-icon">📊</span>
-            <span>Статистика</span>
+
+        <div class="card">
+            <div class="card-title">Фон приложения</div>
+            <div class="form-group">
+                <label>Загрузить своё фото</label>
+                <input type="file" id="bg-file-input" accept="image/*" onchange="uploadCustomBg(event)">
+            </div>
+            <button class="btn btn-primary" style="background-color: #444; color: #fff;" onclick="resetBg()">Сбросить фон</button>
         </div>
     </div>
 
     <script>
-        // Инициализация Telegram WebApp
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // Базовое состояние данных
         let state = {
             transactions: [],
-            goals: []
+            goals: [],
+            settings: {
+                accentColor: '#248232',
+                currency: '₽',
+                bgImage: ''
+            }
         };
 
         let currentPeriod = 'all';
 
-        // Загрузка данных из локального хранилища
         function loadData() {
-            const saved = localStorage.getItem('piggy_app_data');
+            const saved = localStorage.getItem('piggy_app_data_v2');
             if (saved) {
                 state = JSON.parse(saved);
+                if (!state.settings) {
+                    state.settings = { accentColor: '#248232', currency: '₽', bgImage: '' };
+                }
             }
+            applySettings();
             updateUI();
         }
 
-        // Сохранение данных
         function saveData() {
-            localStorage.setItem('piggy_app_data', JSON.stringify(state));
+            localStorage.setItem('piggy_app_data_v2', JSON.stringify(state));
             updateUI();
         }
 
@@ -414,21 +590,137 @@
             }
         }
 
-        // Переключение страниц
+        /* Выплывающая панель */
+        function openSidebar() {
+            triggerVibration();
+            document.getElementById('sidebar').classList.add('open');
+            document.getElementById('sidebar-overlay').classList.add('active');
+        }
+
+        function closeSidebar() {
+            document.getElementById('sidebar').classList.remove('open');
+            document.getElementById('sidebar-overlay').classList.remove('active');
+        }
+
         function switchPage(pageId, el) {
             triggerVibration();
+            closeSidebar();
+
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.querySelectorAll('.sidebar-item').forEach(n => n.classList.remove('active'));
             
             document.getElementById(`page-${pageId}`).classList.add('active');
-            el.classList.add('active');
+            if (el) el.classList.add('active');
 
-            if (pageId === 'stats') {
-                renderStats();
+            if (pageId === 'stats') renderStats();
+            if (pageId === 'home') updateCategorySelect();
+        }
+
+        /* Обновление пользовательских настроек */
+        function applySettings() {
+            document.documentElement.style.setProperty('--accent-color', state.settings.accentColor);
+            document.documentElement.style.setProperty('--currency-symbol', `'${state.settings.currency}'`);
+            
+            if (state.settings.bgImage) {
+                document.body.style.backgroundImage = `url(${state.settings.bgImage})`;
+            } else {
+                document.body.style.backgroundImage = 'none';
+            }
+
+            const currSelect = document.getElementById('currency-select');
+            if (currSelect) currSelect.value = state.settings.currency;
+        }
+
+        function setThemeColor(color, el) {
+            state.settings.accentColor = color;
+            document.querySelectorAll('.color-circle').forEach(c => c.classList.remove('active'));
+            if (el) el.classList.add('active');
+            saveData();
+            applySettings();
+        }
+
+        function changeCurrency(curr) {
+            state.settings.currency = curr;
+            saveData();
+            applySettings();
+        }
+
+        function uploadCustomBg(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                state.settings.bgImage = evt.target.result;
+                saveData();
+                applySettings();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function resetBg() {
+            state.settings.bgImage = '';
+            saveData();
+            applySettings();
+        }
+
+        /* Категории и плашка целей */
+        function updateCategorySelect() {
+            const select = document.getElementById('trans-category');
+            
+            // Сохраняем базовые опции
+            select.innerHTML = `
+                <option value="Еда и продукты">Еда и продукты</option>
+                <option value="Зарплата/Доход">Зарплата / Доход</option>
+                <option value="Развлечения">Развлечения</option>
+                <option value="Транспорт">Транспорт</option>
+                <option value="Покупки">Покупки</option>
+                <option value="Другое">Другое</option>
+            `;
+
+            if (state.goals && state.goals.length > 0) {
+                const optgroup = document.createElement('optgroup');
+                optgroup.label = "🎯 Ваши цели";
+                state.goals.forEach(g => {
+                    const opt = document.createElement('option');
+                    opt.value = `GOAL_${g.id}`;
+                    opt.innerText = `Цель: ${g.title}`;
+                    optgroup.appendChild(opt);
+                });
+                select.appendChild(optgroup);
             }
         }
 
-        // Расчет и обновление интерфейса
+        function handleCategoryChange() {
+            // Клик вне сообщения скрывает его
+            closeNoGoalsBanner();
+        }
+
+        function showNoGoalsBanner() {
+            document.getElementById('no-goals-banner').style.display = 'flex';
+        }
+
+        function closeNoGoalsBanner() {
+            document.getElementById('no-goals-banner').style.display = 'none';
+        }
+
+        function goToGoalsFromBanner() {
+            closeNoGoalsBanner();
+            switchPage('goals', document.querySelectorAll('.sidebar-item')[1]);
+        }
+
+        // Клик за пределами карточки операции скрывает баннер
+        document.addEventListener('click', function(e) {
+            const banner = document.getElementById('no-goals-banner');
+            const card = document.getElementById('operation-card');
+            if (banner && banner.style.display === 'flex') {
+                if (!card.contains(e.target)) {
+                    closeNoGoalsBanner();
+                }
+            }
+        });
+
+        /* Логика баланса и операций */
         function updateUI() {
             let totalIncome = 0;
             let totalExpense = 0;
@@ -438,20 +730,20 @@
                 else totalExpense += t.amount;
             });
 
-            // Вычитаем сумму, отложенную в цели
             let totalGoalSavings = 0;
             state.goals.forEach(g => {
                 totalGoalSavings += (g.current || 0);
             });
 
             const currentBalance = totalIncome - totalExpense - totalGoalSavings;
-            document.getElementById('total-balance').innerText = `${currentBalance.toLocaleString()} ₽`;
+            const curr = state.settings.currency || '₽';
+            document.getElementById('total-balance').innerText = `${currentBalance.toLocaleString()} ${curr}`;
 
+            updateCategorySelect();
             renderTransactions();
             renderGoals();
         }
 
-        // Добавление транзакции
         function addTransaction(type) {
             const amountInput = document.getElementById('trans-amount');
             const categorySelect = document.getElementById('trans-category');
@@ -463,11 +755,33 @@
                 return;
             }
 
+            const catValue = categorySelect.value;
+
+            // Если выбрана цель в категории
+            if (catValue.startsWith('GOAL_')) {
+                const goalId = parseInt(catValue.replace('GOAL_', ''));
+                if (type === 'expense') {
+                    alert('Пополнение цели можно делать только через "+ Доход"!');
+                    return;
+                }
+                depositGoal(goalId, amount);
+                amountInput.value = '';
+                commentInput.value = '';
+                return;
+            }
+
+            // Проверка на отсутствие целей, если пользователь случайно искал их
+            if (state.goals.length === 0 && catValue === 'Другое') {
+                showNoGoalsBanner();
+            }
+
+            const categoryName = categorySelect.options[categorySelect.selectedIndex].text;
+
             const transaction = {
                 id: Date.now(),
                 type: type,
                 amount: amount,
-                category: categorySelect.value,
+                category: categoryName,
                 comment: commentInput.value.trim(),
                 date: new Date().toISOString()
             };
@@ -480,9 +794,10 @@
             commentInput.value = '';
         }
 
-        // Отрисовка списка транзакций
         function renderTransactions() {
             const list = document.getElementById('transactions-list');
+            const curr = state.settings.currency || '₽';
+
             if (state.transactions.length === 0) {
                 list.innerHTML = '<div style="text-align: center; color: var(--hint-color); padding: 10px;">История пуста</div>';
                 return;
@@ -498,14 +813,14 @@
                             <span class="item-sub">${t.comment ? t.comment + ' • ' : ''}${dateStr}</span>
                         </div>
                         <span class="item-amount ${isIncome ? 'amount-income' : 'amount-expense'}">
-                            ${isIncome ? '+' : '-'}${t.amount.toLocaleString()} ₽
+                            ${isIncome ? '+' : '-'}${t.amount.toLocaleString()} ${curr}
                         </span>
                     </div>
                 `;
             }).join('');
         }
 
-        // Создание цели
+        /* Логика целей */
         function createGoal() {
             const titleInput = document.getElementById('goal-title');
             const targetInput = document.getElementById('goal-target');
@@ -534,10 +849,12 @@
             targetInput.value = '';
         }
 
-        // Пополнение цели
-        function depositGoal(goalId) {
-            const amountStr = prompt('Какую сумму вы хотите отложить в эту цель (₽)?');
-            const amount = parseFloat(amountStr);
+        function depositGoal(goalId, customAmount = null) {
+            let amount = customAmount;
+            if (amount === null) {
+                const amountStr = prompt('Какую сумму вы хотите отложить в эту цель?');
+                amount = parseFloat(amountStr);
+            }
 
             if (!amount || amount <= 0) return;
 
@@ -553,17 +870,15 @@
             }
         }
 
-        // Переключатель видимости истории пополнений цели
         function toggleGoalHistory(goalId) {
             const el = document.getElementById(`goal-history-${goalId}`);
-            if (el) {
-                el.classList.toggle('open');
-            }
+            if (el) el.classList.toggle('open');
         }
 
-        // Отрисовка списка целей
         function renderGoals() {
             const container = document.getElementById('goals-list');
+            const curr = state.settings.currency || '₽';
+
             if (state.goals.length === 0) {
                 container.innerHTML = '<div style="text-align: center; color: var(--hint-color); padding: 15px;">У вас пока нет активных целей</div>';
                 return;
@@ -574,9 +889,9 @@
                 
                 const historyItems = (g.history && g.history.length > 0) 
                     ? g.history.map(h => `
-                        <div class="list-item" style="padding: 6px 0;">
+                        <div class="list-item" style="padding: 5px 0;">
                             <span class="item-sub">${new Date(h.date).toLocaleDateString('ru-RU')}</span>
-                            <span class="amount-income">+${h.amount.toLocaleString()} ₽</span>
+                            <span class="amount-income">+${h.amount.toLocaleString()} ${curr}</span>
                         </div>
                     `).join('')
                     : '<div class="item-sub">Пополнений еще не было</div>';
@@ -587,13 +902,13 @@
                             <span>🎯 ${g.title}</span>
                             <span>${percent}%</span>
                         </div>
-                        <div style="font-size: 14px; color: var(--hint-color);">
-                            Накоплено ${g.current.toLocaleString()} из ${g.target.toLocaleString()} ₽
+                        <div style="font-size: 13px; color: var(--hint-color);">
+                            Накоплено ${g.current.toLocaleString()} из ${g.target.toLocaleString()} ${curr}
                         </div>
                         <div class="progress-bar-bg">
                             <div class="progress-bar-fill" style="width: ${percent}%;"></div>
                         </div>
-                        <button class="btn btn-primary" style="margin-top: 10px;" onclick="depositGoal(${g.id})">Пополнить цель</button>
+                        <button class="btn btn-primary" style="margin-top: 8px;" onclick="depositGoal(${g.id})">Пополнить цель</button>
                         
                         <button class="toggle-history-btn" onclick="toggleGoalHistory(${g.id})">
                             📜 История пополнений цели (${g.history ? g.history.length : 0})
@@ -606,7 +921,7 @@
             }).join('');
         }
 
-        // Фильтрация статистики по периоду
+        /* Статистика */
         function setPeriod(period, btn) {
             currentPeriod = period;
             document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
@@ -615,9 +930,10 @@
             renderStats();
         }
 
-        // Расчет статистики
         function renderStats() {
             const now = new Date();
+            const curr = state.settings.currency || '₽';
+
             let filtered = state.transactions.filter(t => {
                 const tDate = new Date(t.date);
                 if (currentPeriod === 'today') {
@@ -628,7 +944,7 @@
                 } else if (currentPeriod === 'month') {
                     return tDate.getMonth() === now.getMonth() && tDate.getFullYear() === now.getFullYear();
                 }
-                return true; // 'all'
+                return true;
             });
 
             let income = 0;
@@ -644,8 +960,8 @@
                 }
             });
 
-            document.getElementById('stat-income').innerText = `+${income.toLocaleString()} ₽`;
-            document.getElementById('stat-expense').innerText = `-${expense.toLocaleString()} ₽`;
+            document.getElementById('stat-income').innerText = `+${income.toLocaleString()} ${curr}`;
+            document.getElementById('stat-expense').innerText = `-${expense.toLocaleString()} ${curr}`;
 
             const catList = document.getElementById('category-stats-list');
             const catKeys = Object.keys(categories);
@@ -664,13 +980,12 @@
                             <span class="item-title">${cat}</span>
                             <span class="item-sub">${pct}% от всех расходов</span>
                         </div>
-                        <span class="item-amount amount-expense">-${amt.toLocaleString()} ₽</span>
+                        <span class="item-amount amount-expense">-${amt.toLocaleString()} ${curr}</span>
                     </div>
                 `;
             }).join('');
         }
 
-        // Запуск при открытии
         loadData();
     </script>
 </body>
