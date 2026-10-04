@@ -158,6 +158,13 @@
             width: 100%;
         }
 
+        .btn-danger {
+            background-color: var(--expense-color);
+            color: #ffffff;
+            width: 100%;
+            font-weight: bold;
+        }
+
         /* Список операций */
         .list-item {
             display: flex;
@@ -561,7 +568,7 @@
                 <span>📊</span> <span>Статистика</span>
             </div>
             <div class="sidebar-item" onclick="switchPage('custom', this)">
-                <span>🎨</span> <span>Кастомизация</span>
+                <span>⚙️</span> <span>Настройки</span>
             </div>
             <div class="sidebar-item" onclick="switchPage('about', this)">
                 <span>ℹ️</span> <span>О приложении</span>
@@ -652,7 +659,7 @@
         </div>
     </div>
 
-    <!-- Раздел 4: Кастомизация -->
+    <!-- Раздел 4: Настройки -->
     <div id="page-custom" class="page">
         <div class="card">
             <div class="card-title">Цвет кнопок и акцентов</div>
@@ -680,6 +687,14 @@
                 <input type="file" id="bg-file-input" accept="image/*" onchange="uploadCustomBg(event)">
             </div>
             <button class="btn btn-primary" style="background-color: #444; color: #fff;" onclick="resetBg()">Сбросить фон</button>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Сброс данных</div>
+            <div style="font-size: 12px; color: var(--hint-color); margin-bottom: 12px;">
+                Полностью очистит баланс, историю, цели и вернет базовый внешний вид приложения.
+            </div>
+            <button class="btn btn-danger" onclick="openModal('modal-reset-confirm')">Начать с чистого листа</button>
         </div>
     </div>
 
@@ -812,11 +827,26 @@
         <button class="btn btn-primary" onclick="applyCustomPeriod()">Применить</button>
     </div>
 
+    <!-- Модальное окно подтверждения сброса -->
+    <div class="custom-modal" id="modal-reset-confirm">
+        <div class="modal-header">
+            <span class="modal-title" style="color: var(--expense-color);">Очистить все данные?</span>
+            <span class="modal-close" onclick="closeActiveModal()">✕</span>
+        </div>
+        <div style="font-size: 13px; color: var(--hint-color); margin-bottom: 15px; line-height: 1.4;">
+            Вы уверены? Это действие безвозвратно удалит всю историю, цели, а также сбросит валюту и оформление.
+        </div>
+        <div class="btn-group">
+            <button class="btn btn-danger" onclick="resetAllData()">Да, очистить</button>
+            <button class="btn btn-primary" style="background:#444;" onclick="closeActiveModal()">Отмена</button>
+        </div>
+    </div>
+
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        let state = {
+        const DEFAULT_STATE = {
             transactions: [],
             goals: [],
             settings: {
@@ -826,6 +856,8 @@
                 bgImage: ''
             }
         };
+
+        let state = JSON.parse(JSON.stringify(DEFAULT_STATE));
 
         let activeDepositGoalId = null;
         let currentPeriod = 'all';
@@ -923,6 +955,16 @@
             if (state.settings.currencyText) {
                 document.getElementById('selected-currency-text').innerText = state.settings.currencyText;
             }
+
+            // Обновляем выделение активного цвета
+            document.querySelectorAll('.color-circle').forEach(c => {
+                if (c.style.background === state.settings.accentColor || 
+                   (c.style.background.includes('36, 130, 50') && state.settings.accentColor === '#248232')) {
+                    c.classList.add('active');
+                } else {
+                    c.classList.remove('active');
+                }
+            });
         }
 
         function setThemeColor(color, el) {
@@ -948,8 +990,27 @@
 
         function resetBg() {
             state.settings.bgImage = '';
+            const fileInput = document.getElementById('bg-file-input');
+            if (fileInput) fileInput.value = '';
             saveData();
             applySettings();
+        }
+
+        /* Сброс с чистого листа */
+        function resetAllData() {
+            state = JSON.parse(JSON.stringify(DEFAULT_STATE));
+            localStorage.removeItem('piggy_app_data_v4');
+            
+            const fileInput = document.getElementById('bg-file-input');
+            if (fileInput) fileInput.value = '';
+
+            applySettings();
+            updateUI();
+            closeActiveModal();
+            triggerVibration();
+            
+            // Возврат на главную страницу
+            switchPage('home', document.querySelectorAll('.sidebar-item')[0]);
         }
 
         /* Расчет общего баланса */
