@@ -36,15 +36,16 @@
             min-height: 100vh;
             user-select: none;
             position: relative;
+            padding-top: 15px; /* Приспустили весь контент вниз */
         }
 
         /* Шапка */
         .header {
             background-color: var(--secondary-bg);
-            padding: 18px;
+            padding: 22px 18px 18px 18px;
+            margin: 0 15px 15px 15px;
             text-align: center;
-            border-bottom-left-radius: 20px;
-            border-bottom-right-radius: 20px;
+            border-radius: 20px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.4);
             backdrop-filter: blur(8px);
         }
@@ -52,7 +53,7 @@
         .balance-title {
             font-size: 13px;
             color: var(--hint-color);
-            margin-bottom: 4px;
+            margin-bottom: 6px;
         }
 
         .balance-amount {
@@ -62,7 +63,7 @@
 
         .page {
             display: none;
-            padding: 15px;
+            padding: 0 15px 20px 15px;
         }
 
         .page.active {
@@ -99,15 +100,20 @@
             margin-bottom: 4px;
         }
 
-        input, select {
+        input, .custom-select-trigger {
             width: 100%;
-            padding: 11px;
+            padding: 12px;
             border-radius: 10px;
             border: 1px solid rgba(255,255,255,0.1);
             background-color: rgba(20, 20, 20, 0.6);
             color: #fff;
             font-size: 14px;
             outline: none;
+            text-align: left;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .btn-group {
@@ -123,7 +129,7 @@
             font-weight: bold;
             font-size: 14px;
             cursor: pointer;
-            transition: transform 0.1s, opacity 0.2s;
+            transition: transform 0.1s;
         }
 
         .btn:active {
@@ -183,7 +189,7 @@
         .amount-income { color: var(--income-color); }
         .amount-expense { color: var(--expense-color); }
 
-        /* Прогресс бар целей */
+        /* Прогресс бар */
         .progress-bar-bg {
             background-color: rgba(255,255,255,0.1);
             height: 8px;
@@ -199,13 +205,13 @@
             transition: width 0.3s;
         }
 
-        /* Левая выплывающая панель (Sidebar) */
+        /* Боковое меню */
         .sidebar-toggle-btn {
             position: fixed;
             left: 0;
             top: 50%;
             transform: translateY(-50%);
-            background: rgba(0, 0, 0, 0.4);
+            background: rgba(0, 0, 0, 0.5);
             color: #fff;
             border: 1px solid rgba(255, 255, 255, 0.15);
             border-left: none;
@@ -213,26 +219,27 @@
             border-top-right-radius: 12px;
             border-bottom-right-radius: 12px;
             cursor: pointer;
-            z-index: 1001;
-            opacity: 0.6;
+            z-index: 999;
+            opacity: 0.7;
             backdrop-filter: blur(5px);
             font-size: 14px;
         }
 
-        .sidebar-overlay {
+        .sidebar-overlay, .modal-overlay {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0,0,0,0.5);
-            z-index: 1002;
+            background: rgba(0,0,0,0.6);
+            z-index: 1000;
             display: none;
             opacity: 0;
-            transition: opacity 0.3s;
+            transition: opacity 0.25s;
+            backdrop-filter: blur(4px);
         }
 
-        .sidebar-overlay.active {
+        .sidebar-overlay.active, .modal-overlay.active {
             display: block;
             opacity: 1;
         }
@@ -248,7 +255,7 @@
             border-top-right-radius: 20px;
             border-bottom-right-radius: 20px;
             padding: 15px;
-            z-index: 1003;
+            z-index: 1001;
             width: max-content;
             max-width: 220px;
             box-shadow: 5px 0 20px rgba(0,0,0,0.5);
@@ -276,7 +283,6 @@
             font-weight: 500;
             cursor: pointer;
             background: transparent;
-            transition: background 0.2s;
         }
 
         .sidebar-item.active {
@@ -284,49 +290,74 @@
             color: var(--accent-text);
         }
 
-        /* Сообщение об отсутствии целей */
-        .no-goals-banner {
-            margin-top: 10px;
-            background: rgba(40, 40, 40, 0.95);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 12px;
-            padding: 12px;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+        /* Кастомное модальное окно (компактное) */
+        .custom-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            background: #222;
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 18px;
+            padding: 18px;
+            width: 85%;
+            max-width: 320px;
+            z-index: 1002;
+            display: none;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+            transition: transform 0.2s, opacity 0.2s;
+            opacity: 0;
         }
 
-        .no-goals-banner .close-btn {
-            position: absolute;
-            top: 6px;
-            right: 10px;
-            color: #888;
+        .custom-modal.active {
+            display: block;
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .modal-title {
             font-size: 16px;
+            font-weight: bold;
+        }
+
+        .modal-close {
+            color: #888;
+            font-size: 18px;
             cursor: pointer;
             padding: 2px 6px;
         }
 
-        .no-goals-text {
-            font-size: 13px;
-            color: var(--hint-color);
-            padding-right: 18px;
+        .modal-option-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 220px;
+            overflow-y: auto;
         }
 
-        .no-goals-btn {
-            background-color: var(--accent-color);
-            color: var(--accent-text);
-            border: none;
-            padding: 8px;
-            border-radius: 8px;
-            font-size: 12px;
-            font-weight: bold;
+        .modal-option-item {
+            padding: 10px 12px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            font-size: 14px;
             cursor: pointer;
-            align-self: flex-start;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        /* Фильтры и статистика */
+        .modal-option-item:active {
+            background: rgba(255,255,255,0.15);
+        }
+
+        /* Стилизация фильтра и статистики */
         .period-filter {
             display: flex;
             gap: 6px;
@@ -391,13 +422,14 @@
 </head>
 <body>
 
-    <!-- Стрелка вызова боковой панели -->
+    <!-- Вызов бокового меню -->
     <button class="sidebar-toggle-btn" onclick="openSidebar()">❯</button>
 
-    <!-- Затемнение фона при открытии панели -->
+    <!-- Затемнение для бокового меню и модальных окон -->
     <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+    <div class="modal-overlay" id="modal-overlay" onclick="closeActiveModal()"></div>
 
-    <!-- Боковое выплывающее меню -->
+    <!-- Боковое меню -->
     <div class="sidebar" id="sidebar">
         <div class="sidebar-menu">
             <div class="sidebar-item active" onclick="switchPage('home', this)">
@@ -423,34 +455,23 @@
 
     <!-- Раздел 1: Копилка -->
     <div id="page-home" class="page active">
-        <div class="card" id="operation-card">
+        <div class="card">
             <div class="card-title">Добавить операцию</div>
             <div class="form-group">
                 <label>Сумма</label>
                 <input type="number" id="trans-amount" placeholder="Например: 500" inputmode="decimal">
             </div>
             <div class="form-group">
-                <label>Категория</label>
-                <select id="trans-category" onchange="handleCategoryChange()">
-                    <option value="Еда и продукты">Еда и продукты</option>
-                    <option value="Зарплата/Доход">Зарплата / Доход</option>
-                    <option value="Развлечения">Развлечения</option>
-                    <option value="Транспорт">Транспорт</option>
-                    <option value="Покупки">Покупки</option>
-                    <option value="Другое">Другое</option>
-                </select>
-            </div>
-
-            <!-- Плашка отсутствия целей -->
-            <div id="no-goals-banner" class="no-goals-banner" style="display: none;">
-                <span class="close-btn" onclick="closeNoGoalsBanner()">✕</span>
-                <div class="no-goals-text">У вас пока нет поставленных целей</div>
-                <button class="no-goals-btn" onclick="goToGoalsFromBanner()">+ Добавить цель</button>
+                <label>Категория (Цели)</label>
+                <div class="custom-select-trigger" onclick="openCategoryModal()">
+                    <span id="selected-category-text">Выберите цель...</span>
+                    <span style="font-size: 10px; color: var(--hint-color);">▼</span>
+                </div>
             </div>
 
             <div class="form-group" style="margin-top: 10px;">
                 <label>Комментарий (необязательно)</label>
-                <input type="text" id="trans-comment" placeholder="Например: Поход в кино">
+                <input type="text" id="trans-comment" placeholder="Например: Пополнение">
             </div>
             <div class="btn-group">
                 <button class="btn btn-income" onclick="addTransaction('income')">+ Доход</button>
@@ -528,16 +549,9 @@
 
         <div class="card">
             <div class="card-title">Валюта</div>
-            <div class="form-group">
-                <select id="currency-select" onchange="changeCurrency(this.value)">
-                    <option value="₽">Рубли (₽)</option>
-                    <option value="$">Доллары ($)</option>
-                    <option value="€">Евро (€)</option>
-                    <option value="₸">Тенге (₸)</option>
-                    <option value="₴">Гривны (₴)</option>
-                    <option value="Br">Бел. рубль (Br)</option>
-                    <option value="¥">Иена / Юань (¥)</option>
-                </select>
+            <div class="custom-select-trigger" onclick="openCurrencyModal()">
+                <span id="selected-currency-text">Рубли (₽)</span>
+                <span style="font-size: 10px; color: var(--hint-color);">▼</span>
             </div>
         </div>
 
@@ -551,6 +565,59 @@
         </div>
     </div>
 
+    <!-- КАСТОМНЫЕ МОДАЛЬНЫЕ ОКНА -->
+
+    <!-- Модальное окно выбора Категорий (Целей) -->
+    <div class="custom-modal" id="modal-category">
+        <div class="modal-header">
+            <span class="modal-title">Выберите цель</span>
+            <span class="modal-close" onclick="closeActiveModal()">✕</span>
+        </div>
+        <div class="modal-option-list" id="modal-category-list"></div>
+    </div>
+
+    <!-- Модальное окно выбора Валюты -->
+    <div class="custom-modal" id="modal-currency">
+        <div class="modal-header">
+            <span class="modal-title">Выберите валюту</span>
+            <span class="modal-close" onclick="closeActiveModal()">✕</span>
+        </div>
+        <div class="modal-option-list">
+            <div class="modal-option-item" onclick="selectCurrency('₽', 'Рубли (₽)')">Рубли (₽)</div>
+            <div class="modal-option-item" onclick="selectCurrency('$', 'Доллары ($)')">Доллары ($)</div>
+            <div class="modal-option-item" onclick="selectCurrency('€', 'Евро (€)')">Евро (€)</div>
+            <div class="modal-option-item" onclick="selectCurrency('₸', 'Тенге (₸)')">Тенге (₸)</div>
+            <div class="modal-option-item" onclick="selectCurrency('₴', 'Гривны (₴)')">Гривны (₴)</div>
+            <div class="modal-option-item" onclick="selectCurrency('Br', 'Бел. рубль (Br)')">Бел. рубль (Br)</div>
+            <div class="modal-option-item" onclick="selectCurrency('¥', 'Иена / Юань (¥)')">Иена / Юань (¥)</div>
+        </div>
+    </div>
+
+    <!-- Модальное окно пополнения цели (Сумма) -->
+    <div class="custom-modal" id="modal-deposit-input">
+        <div class="modal-header">
+            <span class="modal-title">Пополнить цель</span>
+            <span class="modal-close" onclick="closeActiveModal()">✕</span>
+        </div>
+        <div class="form-group">
+            <label>Сумма пополнения</label>
+            <input type="number" id="modal-deposit-amount" placeholder="Введите сумму" inputmode="decimal">
+        </div>
+        <button class="btn btn-primary" onclick="confirmGoalDeposit()">Пополнить</button>
+    </div>
+
+    <!-- Модальное окно "Недостаточно средств" -->
+    <div class="custom-modal" id="modal-no-funds">
+        <div class="modal-header">
+            <span class="modal-title" style="color: var(--expense-color);">Недостаточно средств</span>
+            <span class="modal-close" onclick="closeActiveModal()">✕</span>
+        </div>
+        <div style="font-size: 13px; color: var(--hint-color); margin-bottom: 15px;">
+            На вашем балансе недостаточно средств для совершения этой операции.
+        </div>
+        <button class="btn btn-primary" onclick="goToHomeFromModal()">Пополнить</button>
+    </div>
+
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
@@ -561,18 +628,21 @@
             settings: {
                 accentColor: '#248232',
                 currency: '₽',
+                currencyText: 'Рубли (₽)',
                 bgImage: ''
             }
         };
 
+        let selectedGoalId = null;
+        let activeDepositGoalId = null;
         let currentPeriod = 'all';
 
         function loadData() {
-            const saved = localStorage.getItem('piggy_app_data_v2');
+            const saved = localStorage.getItem('piggy_app_data_v3');
             if (saved) {
                 state = JSON.parse(saved);
                 if (!state.settings) {
-                    state.settings = { accentColor: '#248232', currency: '₽', bgImage: '' };
+                    state.settings = { accentColor: '#248232', currency: '₽', currencyText: 'Рубли (₽)', bgImage: '' };
                 }
             }
             applySettings();
@@ -580,7 +650,7 @@
         }
 
         function saveData() {
-            localStorage.setItem('piggy_app_data_v2', JSON.stringify(state));
+            localStorage.setItem('piggy_app_data_v3', JSON.stringify(state));
             updateUI();
         }
 
@@ -590,7 +660,7 @@
             }
         }
 
-        /* Выплывающая панель */
+        /* Управление меню и модальными окнами */
         function openSidebar() {
             triggerVibration();
             document.getElementById('sidebar').classList.add('open');
@@ -600,6 +670,17 @@
         function closeSidebar() {
             document.getElementById('sidebar').classList.remove('open');
             document.getElementById('sidebar-overlay').classList.remove('active');
+        }
+
+        function openModal(modalId) {
+            triggerVibration();
+            document.getElementById('modal-overlay').classList.add('active');
+            document.getElementById(modalId).classList.add('active');
+        }
+
+        function closeActiveModal() {
+            document.getElementById('modal-overlay').classList.remove('active');
+            document.querySelectorAll('.custom-modal').forEach(m => m.classList.remove('active'));
         }
 
         function switchPage(pageId, el) {
@@ -613,13 +694,64 @@
             if (el) el.classList.add('active');
 
             if (pageId === 'stats') renderStats();
-            if (pageId === 'home') updateCategorySelect();
         }
 
-        /* Обновление пользовательских настроек */
+        /* Модалка категорий (Только цели) */
+        function openCategoryModal() {
+            const container = document.getElementById('modal-category-list');
+            
+            if (!state.goals || state.goals.length === 0) {
+                container.innerHTML = `
+                    <div style="font-size: 13px; color: var(--hint-color); text-align: center; padding: 10px 0;">
+                        У вас пока нет целей
+                    </div>
+                    <button class="btn btn-primary" onclick="goToGoalsFromModal()">+ Добавить цель</button>
+                `;
+            } else {
+                container.innerHTML = state.goals.map(g => `
+                    <div class="modal-option-item" onclick="selectGoalCategory(${g.id}, '${g.title.replace(/'/g, "\\'")}')">
+                        <span>🎯 ${g.title}</span>
+                        <span style="font-size: 11px; color: var(--hint-color);">${g.current}/${g.target} ${state.settings.currency}</span>
+                    </div>
+                `).join('');
+            }
+
+            openModal('modal-category');
+        }
+
+        function selectGoalCategory(goalId, goalTitle) {
+            selectedGoalId = goalId;
+            document.getElementById('selected-category-text').innerText = `🎯 ${goalTitle}`;
+            closeActiveModal();
+        }
+
+        function goToGoalsFromModal() {
+            closeActiveModal();
+            switchPage('goals', document.querySelectorAll('.sidebar-item')[1]);
+        }
+
+        function goToHomeFromModal() {
+            closeActiveModal();
+            switchPage('home', document.querySelectorAll('.sidebar-item')[0]);
+        }
+
+        /* Модалка валюты */
+        function openCurrencyModal() {
+            openModal('modal-currency');
+        }
+
+        function selectCurrency(symbol, text) {
+            state.settings.currency = symbol;
+            state.settings.currencyText = text;
+            document.getElementById('selected-currency-text').innerText = text;
+            saveData();
+            applySettings();
+            closeActiveModal();
+        }
+
+        /* Настройки темы и фона */
         function applySettings() {
             document.documentElement.style.setProperty('--accent-color', state.settings.accentColor);
-            document.documentElement.style.setProperty('--currency-symbol', `'${state.settings.currency}'`);
             
             if (state.settings.bgImage) {
                 document.body.style.backgroundImage = `url(${state.settings.bgImage})`;
@@ -627,20 +759,15 @@
                 document.body.style.backgroundImage = 'none';
             }
 
-            const currSelect = document.getElementById('currency-select');
-            if (currSelect) currSelect.value = state.settings.currency;
+            if (state.settings.currencyText) {
+                document.getElementById('selected-currency-text').innerText = state.settings.currencyText;
+            }
         }
 
         function setThemeColor(color, el) {
             state.settings.accentColor = color;
             document.querySelectorAll('.color-circle').forEach(c => c.classList.remove('active'));
             if (el) el.classList.add('active');
-            saveData();
-            applySettings();
-        }
-
-        function changeCurrency(curr) {
-            state.settings.currency = curr;
             saveData();
             applySettings();
         }
@@ -664,64 +791,8 @@
             applySettings();
         }
 
-        /* Категории и плашка целей */
-        function updateCategorySelect() {
-            const select = document.getElementById('trans-category');
-            
-            // Сохраняем базовые опции
-            select.innerHTML = `
-                <option value="Еда и продукты">Еда и продукты</option>
-                <option value="Зарплата/Доход">Зарплата / Доход</option>
-                <option value="Развлечения">Развлечения</option>
-                <option value="Транспорт">Транспорт</option>
-                <option value="Покупки">Покупки</option>
-                <option value="Другое">Другое</option>
-            `;
-
-            if (state.goals && state.goals.length > 0) {
-                const optgroup = document.createElement('optgroup');
-                optgroup.label = "🎯 Ваши цели";
-                state.goals.forEach(g => {
-                    const opt = document.createElement('option');
-                    opt.value = `GOAL_${g.id}`;
-                    opt.innerText = `Цель: ${g.title}`;
-                    optgroup.appendChild(opt);
-                });
-                select.appendChild(optgroup);
-            }
-        }
-
-        function handleCategoryChange() {
-            // Клик вне сообщения скрывает его
-            closeNoGoalsBanner();
-        }
-
-        function showNoGoalsBanner() {
-            document.getElementById('no-goals-banner').style.display = 'flex';
-        }
-
-        function closeNoGoalsBanner() {
-            document.getElementById('no-goals-banner').style.display = 'none';
-        }
-
-        function goToGoalsFromBanner() {
-            closeNoGoalsBanner();
-            switchPage('goals', document.querySelectorAll('.sidebar-item')[1]);
-        }
-
-        // Клик за пределами карточки операции скрывает баннер
-        document.addEventListener('click', function(e) {
-            const banner = document.getElementById('no-goals-banner');
-            const card = document.getElementById('operation-card');
-            if (banner && banner.style.display === 'flex') {
-                if (!card.contains(e.target)) {
-                    closeNoGoalsBanner();
-                }
-            }
-        });
-
-        /* Логика баланса и операций */
-        function updateUI() {
+        /* Расчет баланса */
+        function getCalculatedBalance() {
             let totalIncome = 0;
             let totalExpense = 0;
 
@@ -735,53 +806,50 @@
                 totalGoalSavings += (g.current || 0);
             });
 
-            const currentBalance = totalIncome - totalExpense - totalGoalSavings;
+            return totalIncome - totalExpense - totalGoalSavings;
+        }
+
+        function updateUI() {
+            const currentBalance = getCalculatedBalance();
             const curr = state.settings.currency || '₽';
             document.getElementById('total-balance').innerText = `${currentBalance.toLocaleString()} ${curr}`;
 
-            updateCategorySelect();
             renderTransactions();
             renderGoals();
         }
 
+        /* Транзакции */
         function addTransaction(type) {
             const amountInput = document.getElementById('trans-amount');
-            const categorySelect = document.getElementById('trans-category');
             const commentInput = document.getElementById('trans-comment');
 
             const amount = parseFloat(amountInput.value);
-            if (!amount || amount <= 0) {
-                alert('Введите корректную сумму!');
-                return;
-            }
+            if (!amount || amount <= 0) return;
 
-            const catValue = categorySelect.value;
-
-            // Если выбрана цель в категории
-            if (catValue.startsWith('GOAL_')) {
-                const goalId = parseInt(catValue.replace('GOAL_', ''));
+            if (selectedGoalId) {
                 if (type === 'expense') {
-                    alert('Пополнение цели можно делать только через "+ Доход"!');
+                    openModal('modal-no-funds');
                     return;
                 }
-                depositGoal(goalId, amount);
+
+                // Пополнение цели через категорию
+                const currentBalance = getCalculatedBalance();
+                if (amount > currentBalance) {
+                    openModal('modal-no-funds');
+                    return;
+                }
+
+                executeGoalDeposit(selectedGoalId, amount);
                 amountInput.value = '';
                 commentInput.value = '';
                 return;
             }
 
-            // Проверка на отсутствие целей, если пользователь случайно искал их
-            if (state.goals.length === 0 && catValue === 'Другое') {
-                showNoGoalsBanner();
-            }
-
-            const categoryName = categorySelect.options[categorySelect.selectedIndex].text;
-
             const transaction = {
                 id: Date.now(),
                 type: type,
                 amount: amount,
-                category: categoryName,
+                category: 'Общий счет',
                 comment: commentInput.value.trim(),
                 date: new Date().toISOString()
             };
@@ -820,7 +888,7 @@
             }).join('');
         }
 
-        /* Логика целей */
+        /* Цели */
         function createGoal() {
             const titleInput = document.getElementById('goal-title');
             const targetInput = document.getElementById('goal-target');
@@ -828,10 +896,7 @@
             const title = titleInput.value.trim();
             const target = parseFloat(targetInput.value);
 
-            if (!title || !target || target <= 0) {
-                alert('Заполните название и целевую сумму!');
-                return;
-            }
+            if (!title || !target || target <= 0) return;
 
             const goal = {
                 id: Date.now(),
@@ -849,15 +914,30 @@
             targetInput.value = '';
         }
 
-        function depositGoal(goalId, customAmount = null) {
-            let amount = customAmount;
-            if (amount === null) {
-                const amountStr = prompt('Какую сумму вы хотите отложить в эту цель?');
-                amount = parseFloat(amountStr);
-            }
+        function promptDepositGoal(goalId) {
+            activeDepositGoalId = goalId;
+            document.getElementById('modal-deposit-amount').value = '';
+            openModal('modal-deposit-input');
+        }
+
+        function confirmGoalDeposit() {
+            const input = document.getElementById('modal-deposit-amount');
+            const amount = parseFloat(input.value);
 
             if (!amount || amount <= 0) return;
 
+            const currentBalance = getCalculatedBalance();
+            if (amount > currentBalance) {
+                closeActiveModal();
+                openModal('modal-no-funds');
+                return;
+            }
+
+            executeGoalDeposit(activeDepositGoalId, amount);
+            closeActiveModal();
+        }
+
+        function executeGoalDeposit(goalId, amount) {
             const goal = state.goals.find(g => g.id === goalId);
             if (goal) {
                 goal.current = (goal.current || 0) + amount;
@@ -908,7 +988,7 @@
                         <div class="progress-bar-bg">
                             <div class="progress-bar-fill" style="width: ${percent}%;"></div>
                         </div>
-                        <button class="btn btn-primary" style="margin-top: 8px;" onclick="depositGoal(${g.id})">Пополнить цель</button>
+                        <button class="btn btn-primary" style="margin-top: 8px;" onclick="promptDepositGoal(${g.id})">Пополнить цель</button>
                         
                         <button class="toggle-history-btn" onclick="toggleGoalHistory(${g.id})">
                             📜 История пополнений цели (${g.history ? g.history.length : 0})
