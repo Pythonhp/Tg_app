@@ -36,7 +36,7 @@
             min-height: 100vh;
             user-select: none;
             position: relative;
-            padding-top: 15px; /* Приспустили весь контент вниз */
+            padding-top: 35px;
         }
 
         /* Шапка */
@@ -63,7 +63,7 @@
 
         .page {
             display: none;
-            padding: 0 15px 20px 15px;
+            padding: 0 15px 25px 15px;
         }
 
         .page.active {
@@ -78,6 +78,12 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.3);
             backdrop-filter: blur(10px);
             position: relative;
+            border: 2px solid transparent;
+            transition: border-color 0.3s;
+        }
+
+        .card.completed-goal {
+            border-color: #2ec4b6;
         }
 
         .card-title {
@@ -168,6 +174,8 @@
         .item-info {
             display: flex;
             flex-direction: column;
+            align-items: flex-start;
+            gap: 4px;
         }
 
         .item-title {
@@ -178,7 +186,19 @@
         .item-sub {
             font-size: 11px;
             color: var(--hint-color);
-            margin-top: 2px;
+        }
+
+        /* Облачко комментария */
+        .comment-cloud {
+            display: inline-block;
+            background: rgba(0, 0, 0, 0.4);
+            color: var(--hint-color);
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            max-width: 200px;
+            word-wrap: break-word;
         }
 
         .item-amount {
@@ -203,6 +223,40 @@
             height: 100%;
             width: 0%;
             transition: width 0.3s;
+        }
+
+        /* Выполнение цели */
+        .goal-status-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .goal-check-badge {
+            background-color: #2ec4b6;
+            color: #121212;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        /* Сообщение об ошибке лимита целей */
+        .limit-error-msg {
+            display: none;
+            background-color: rgba(231, 29, 54, 0.15);
+            border: 1px solid var(--expense-color);
+            color: #ff6b6b;
+            font-size: 12px;
+            padding: 10px 14px;
+            border-radius: 12px;
+            margin-top: 10px;
+            text-align: center;
+            line-height: 1.3;
         }
 
         /* Боковое меню */
@@ -231,7 +285,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0,0,0,0.6);
+            background: rgba(0,0,0,0.65);
             z-index: 1000;
             display: none;
             opacity: 0;
@@ -290,7 +344,7 @@
             color: var(--accent-text);
         }
 
-        /* Кастомное модальное окно (компактное) */
+        /* Строго аккуратное кастомное модальное окно */
         .custom-modal {
             position: fixed;
             top: 50%;
@@ -302,6 +356,7 @@
             padding: 18px;
             width: 85%;
             max-width: 320px;
+            height: fit-content;
             z-index: 1002;
             display: none;
             box-shadow: 0 10px 25px rgba(0,0,0,0.6);
@@ -328,10 +383,11 @@
         }
 
         .modal-close {
-            color: #888;
+            color: #888888;
             font-size: 18px;
             cursor: pointer;
             padding: 2px 6px;
+            line-height: 1;
         }
 
         .modal-option-list {
@@ -357,12 +413,13 @@
             background: rgba(255,255,255,0.15);
         }
 
-        /* Стилизация фильтра и статистики */
+        /* Фильтр и статистика */
         .period-filter {
             display: flex;
             gap: 6px;
             margin-bottom: 12px;
             overflow-x: auto;
+            padding-bottom: 4px;
         }
 
         .period-btn {
@@ -373,6 +430,7 @@
             border: none;
             font-size: 12px;
             white-space: nowrap;
+            cursor: pointer;
         }
 
         .period-btn.active {
@@ -418,14 +476,75 @@
         .color-circle.active {
             border-color: #ffffff;
         }
+
+        /* Стили для раздела О приложении / Обучения */
+        .tutorial-step {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .tutorial-step:first-child {
+            margin-top: 0;
+            padding-top: 0;
+            border-top: none;
+        }
+
+        .tutorial-step-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: var(--income-color);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .tutorial-step-desc {
+            font-size: 12px;
+            color: var(--hint-color);
+            line-height: 1.4;
+        }
+
+        .mock-illustration {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px dashed rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 10px;
+            margin-top: 4px;
+            font-size: 11px;
+        }
+
+        .dev-link-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 12px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #0088cc, #005580);
+            color: #ffffff;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 14px;
+            box-shadow: 0 4px 10px rgba(0, 136, 204, 0.3);
+            transition: transform 0.1s;
+        }
+
+        .dev-link-btn:active {
+            transform: scale(0.97);
+        }
     </style>
 </head>
 <body>
 
-    <!-- Вызов бокового меню -->
+    <!-- Кнопка вызова меню -->
     <button class="sidebar-toggle-btn" onclick="openSidebar()">❯</button>
 
-    <!-- Затемнение для бокового меню и модальных окон -->
+    <!-- Затемняющие оверлеи -->
     <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
     <div class="modal-overlay" id="modal-overlay" onclick="closeActiveModal()"></div>
 
@@ -443,6 +562,9 @@
             </div>
             <div class="sidebar-item" onclick="switchPage('custom', this)">
                 <span>🎨</span> <span>Кастомизация</span>
+            </div>
+            <div class="sidebar-item" onclick="switchPage('about', this)">
+                <span>ℹ️</span> <span>О приложении</span>
             </div>
         </div>
     </div>
@@ -462,16 +584,8 @@
                 <input type="number" id="trans-amount" placeholder="Например: 500" inputmode="decimal">
             </div>
             <div class="form-group">
-                <label>Категория (Цели)</label>
-                <div class="custom-select-trigger" onclick="openCategoryModal()">
-                    <span id="selected-category-text">Выберите цель...</span>
-                    <span style="font-size: 10px; color: var(--hint-color);">▼</span>
-                </div>
-            </div>
-
-            <div class="form-group" style="margin-top: 10px;">
-                <label>Комментарий (необязательно)</label>
-                <input type="text" id="trans-comment" placeholder="Например: Пополнение">
+                <label>Комментарий (макс. 30 символов)</label>
+                <input type="text" id="trans-comment" placeholder="Например: Зарплата" maxlength="30">
             </div>
             <div class="btn-group">
                 <button class="btn btn-income" onclick="addTransaction('income')">+ Доход</button>
@@ -500,6 +614,9 @@
                 <input type="number" id="goal-target" placeholder="Например: 50000" inputmode="decimal">
             </div>
             <button class="btn btn-primary" onclick="createGoal()">Создать цель</button>
+            <div class="limit-error-msg" id="goal-limit-msg">
+                У вас много незавершенных целей, попробуйте закончить начатые.
+            </div>
         </div>
 
         <div id="goals-list"></div>
@@ -512,10 +629,11 @@
             <button class="period-btn" onclick="setPeriod('month', this)">За месяц</button>
             <button class="period-btn" onclick="setPeriod('week', this)">За неделю</button>
             <button class="period-btn" onclick="setPeriod('today', this)">Сегодня</button>
+            <button class="period-btn" onclick="openCustomPeriodModal()">Выбрать период</button>
         </div>
 
         <div class="card">
-            <div class="card-title">Обзор за период</div>
+            <div class="card-title" id="stat-period-title">Обзор за период</div>
             <div class="list-item">
                 <span>Доходы:</span>
                 <span class="amount-income" id="stat-income">0</span>
@@ -527,7 +645,7 @@
         </div>
 
         <div class="card">
-            <div class="card-title">Расходы по категориям</div>
+            <div class="card-title">Расходы по операциям</div>
             <div id="category-stats-list">
                 <div style="text-align: center; color: var(--hint-color); padding: 10px;">Нет данных</div>
             </div>
@@ -565,16 +683,75 @@
         </div>
     </div>
 
-    <!-- КАСТОМНЫЕ МОДАЛЬНЫЕ ОКНА -->
-
-    <!-- Модальное окно выбора Категорий (Целей) -->
-    <div class="custom-modal" id="modal-category">
-        <div class="modal-header">
-            <span class="modal-title">Выберите цель</span>
-            <span class="modal-close" onclick="closeActiveModal()">✕</span>
+    <!-- Раздел 5: О приложении -->
+    <div id="page-about" class="page">
+        <div class="card">
+            <div class="card-title">💡 Смысл приложения</div>
+            <div style="font-size: 13px; color: var(--hint-color); line-height: 1.5;">
+                Приложение <b>«Финансовая Копилка»</b> создано для того, чтобы помочь вам легко и наглядно управлять своими финансами, контролировать доходы и расходы, а также уверенно накапливать средства на личные мечты и цели.
+            </div>
         </div>
-        <div class="modal-option-list" id="modal-category-list"></div>
+
+        <div class="card">
+            <div class="card-title">📖 Обучение пользованию</div>
+
+            <!-- Шаг 1 -->
+            <div class="tutorial-step">
+                <div class="tutorial-step-title">1. Учет доходов и расходов</div>
+                <div class="tutorial-step-desc">
+                    В разделе <b>Копилка</b> вводите сумму и краткий комментарий, затем нажимайте кнопочки доходов или расходов.
+                </div>
+                <div class="mock-illustration">
+                    <div style="display: flex; gap: 8px;">
+                        <div style="flex:1; background:#2ec4b6; color:#000; text-align:center; padding:6px; border-radius:6px; font-weight:bold;">+ Доход</div>
+                        <div style="flex:1; background:#e71d36; color:#fff; text-align:center; padding:6px; border-radius:6px; font-weight:bold;">- Расход</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Шаг 2 -->
+            <div class="tutorial-step">
+                <div class="tutorial-step-title">2. Накопление на цели</div>
+                <div class="tutorial-step-desc">
+                    Создавайте до 10 финансовых целей в разделе <b>Цели</b> и переводите туда средства со своего текущего баланса.
+                </div>
+                <div class="mock-illustration">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:4px; color:#fff;">
+                        <span>🎯 Мечта</span> <span>100% <span style="background:#2ec4b6; color:#000; padding:1px 4px; border-radius:50%;">✓</span></span>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.1); height:6px; border-radius:3px; overflow:hidden;">
+                        <div style="background:#2ec4b6; width:100%; height:100%;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Шаг 3 -->
+            <div class="tutorial-step">
+                <div class="tutorial-step-title">3. Анализ и статистика</div>
+                <div class="tutorial-step-desc">
+                    Отслеживайте свои финансовые потоки в разделе <b>Статистика</b> за день, неделю, месяц или за указанный вами период.
+                </div>
+                <div class="mock-illustration">
+                    <div style="display:flex; gap:4px; overflow-x:auto;">
+                        <span style="background:var(--accent-color); padding:3px 8px; border-radius:10px; color:#fff;">За месяц</span>
+                        <span style="background:rgba(255,255,255,0.1); padding:3px 8px; border-radius:10px; color:#888;">За неделю</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">👨‍💻 Разработчик</div>
+            <div style="font-size: 13px; color: var(--hint-color); margin-bottom: 12px;">
+                Есть вопросы, предложения или идеи по улучшению приложения?
+            </div>
+            <a href="https://t.me/mupo4ek" target="_blank" class="dev-link-btn">
+                <span>💬</span> Связаться с разработчиком
+            </a>
+        </div>
     </div>
+
+    <!-- КАСТОМНЫЕ МОДАЛЬНЫЕ ОКНА -->
 
     <!-- Модальное окно выбора Валюты -->
     <div class="custom-modal" id="modal-currency">
@@ -593,7 +770,7 @@
         </div>
     </div>
 
-    <!-- Модальное окно пополнения цели (Сумма) -->
+    <!-- Модальное окно пополнения цели -->
     <div class="custom-modal" id="modal-deposit-input">
         <div class="modal-header">
             <span class="modal-title">Пополнить цель</span>
@@ -618,6 +795,23 @@
         <button class="btn btn-primary" onclick="goToHomeFromModal()">Пополнить</button>
     </div>
 
+    <!-- Модальное окно выбора своего периода в статистике -->
+    <div class="custom-modal" id="modal-custom-period">
+        <div class="modal-header">
+            <span class="modal-title">Выберите период</span>
+            <span class="modal-close" onclick="closeActiveModal()">✕</span>
+        </div>
+        <div class="form-group">
+            <label>От даты</label>
+            <input type="date" id="period-start-date">
+        </div>
+        <div class="form-group">
+            <label>До даты</label>
+            <input type="date" id="period-end-date">
+        </div>
+        <button class="btn btn-primary" onclick="applyCustomPeriod()">Применить</button>
+    </div>
+
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
@@ -633,12 +827,13 @@
             }
         };
 
-        let selectedGoalId = null;
         let activeDepositGoalId = null;
         let currentPeriod = 'all';
+        let customStartDate = null;
+        let customEndDate = null;
 
         function loadData() {
-            const saved = localStorage.getItem('piggy_app_data_v3');
+            const saved = localStorage.getItem('piggy_app_data_v4');
             if (saved) {
                 state = JSON.parse(saved);
                 if (!state.settings) {
@@ -650,7 +845,7 @@
         }
 
         function saveData() {
-            localStorage.setItem('piggy_app_data_v3', JSON.stringify(state));
+            localStorage.setItem('piggy_app_data_v4', JSON.stringify(state));
             updateUI();
         }
 
@@ -660,7 +855,7 @@
             }
         }
 
-        /* Управление меню и модальными окнами */
+        /* Управление меню и оверлеями */
         function openSidebar() {
             triggerVibration();
             document.getElementById('sidebar').classList.add('open');
@@ -694,40 +889,6 @@
             if (el) el.classList.add('active');
 
             if (pageId === 'stats') renderStats();
-        }
-
-        /* Модалка категорий (Только цели) */
-        function openCategoryModal() {
-            const container = document.getElementById('modal-category-list');
-            
-            if (!state.goals || state.goals.length === 0) {
-                container.innerHTML = `
-                    <div style="font-size: 13px; color: var(--hint-color); text-align: center; padding: 10px 0;">
-                        У вас пока нет целей
-                    </div>
-                    <button class="btn btn-primary" onclick="goToGoalsFromModal()">+ Добавить цель</button>
-                `;
-            } else {
-                container.innerHTML = state.goals.map(g => `
-                    <div class="modal-option-item" onclick="selectGoalCategory(${g.id}, '${g.title.replace(/'/g, "\\'")}')">
-                        <span>🎯 ${g.title}</span>
-                        <span style="font-size: 11px; color: var(--hint-color);">${g.current}/${g.target} ${state.settings.currency}</span>
-                    </div>
-                `).join('');
-            }
-
-            openModal('modal-category');
-        }
-
-        function selectGoalCategory(goalId, goalTitle) {
-            selectedGoalId = goalId;
-            document.getElementById('selected-category-text').innerText = `🎯 ${goalTitle}`;
-            closeActiveModal();
-        }
-
-        function goToGoalsFromModal() {
-            closeActiveModal();
-            switchPage('goals', document.querySelectorAll('.sidebar-item')[1]);
         }
 
         function goToHomeFromModal() {
@@ -791,7 +952,7 @@
             applySettings();
         }
 
-        /* Расчет баланса */
+        /* Расчет общего баланса */
         function getCalculatedBalance() {
             let totalIncome = 0;
             let totalExpense = 0;
@@ -818,7 +979,7 @@
             renderGoals();
         }
 
-        /* Транзакции */
+        /* Операции Копилки */
         function addTransaction(type) {
             const amountInput = document.getElementById('trans-amount');
             const commentInput = document.getElementById('trans-comment');
@@ -826,30 +987,19 @@
             const amount = parseFloat(amountInput.value);
             if (!amount || amount <= 0) return;
 
-            if (selectedGoalId) {
-                if (type === 'expense') {
-                    openModal('modal-no-funds');
-                    return;
-                }
-
-                // Пополнение цели через категорию
+            if (type === 'expense') {
                 const currentBalance = getCalculatedBalance();
                 if (amount > currentBalance) {
                     openModal('modal-no-funds');
                     return;
                 }
-
-                executeGoalDeposit(selectedGoalId, amount);
-                amountInput.value = '';
-                commentInput.value = '';
-                return;
             }
 
             const transaction = {
                 id: Date.now(),
                 type: type,
                 amount: amount,
-                category: 'Общий счет',
+                category: type === 'income' ? 'Пополнение' : 'Расход',
                 comment: commentInput.value.trim(),
                 date: new Date().toISOString()
             };
@@ -871,14 +1021,21 @@
                 return;
             }
 
-            list.innerHTML = state.transactions.slice(0, 15).map(t => {
-                const dateStr = new Date(t.date).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
+            list.innerHTML = state.transactions.slice(0, 20).map(t => {
+                const dateObj = new Date(t.date);
+                const dateStr = dateObj.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
                 const isIncome = t.type === 'income';
+
+                const commentHtml = t.comment 
+                    ? `<div class="comment-cloud">${t.comment}</div>` 
+                    : '';
+
                 return `
                     <div class="list-item">
                         <div class="item-info">
                             <span class="item-title">${t.category}</span>
-                            <span class="item-sub">${t.comment ? t.comment + ' • ' : ''}${dateStr}</span>
+                            <span class="item-sub">${dateStr}</span>
+                            ${commentHtml}
                         </div>
                         <span class="item-amount ${isIncome ? 'amount-income' : 'amount-expense'}">
                             ${isIncome ? '+' : '-'}${t.amount.toLocaleString()} ${curr}
@@ -888,8 +1045,18 @@
             }).join('');
         }
 
-        /* Цели */
+        /* Цели (Лимит 10 штук + Завершение) */
         function createGoal() {
+            const limitMsg = document.getElementById('goal-limit-msg');
+            
+            if (state.goals.length >= 10) {
+                limitMsg.style.display = 'block';
+                triggerVibration();
+                return;
+            } else {
+                limitMsg.style.display = 'none';
+            }
+
             const titleInput = document.getElementById('goal-title');
             const targetInput = document.getElementById('goal-target');
 
@@ -940,11 +1107,17 @@
         function executeGoalDeposit(goalId, amount) {
             const goal = state.goals.find(g => g.id === goalId);
             if (goal) {
-                goal.current = (goal.current || 0) + amount;
+                const spaceLeft = goal.target - goal.current;
+                const actualAmount = Math.min(amount, spaceLeft);
+
+                if (actualAmount <= 0) return;
+
+                goal.current += actualAmount;
                 goal.history.unshift({
-                    amount: amount,
+                    amount: actualAmount,
                     date: new Date().toISOString()
                 });
+
                 saveData();
                 triggerVibration();
             }
@@ -958,29 +1131,57 @@
         function renderGoals() {
             const container = document.getElementById('goals-list');
             const curr = state.settings.currency || '₽';
+            const limitMsg = document.getElementById('goal-limit-msg');
+
+            if (state.goals.length < 10) {
+                limitMsg.style.display = 'none';
+            }
 
             if (state.goals.length === 0) {
                 container.innerHTML = '<div style="text-align: center; color: var(--hint-color); padding: 15px;">У вас пока нет активных целей</div>';
                 return;
             }
 
-            container.innerHTML = state.goals.map(g => {
+            const sortedGoals = [...state.goals].sort((a, b) => {
+                const aCompleted = a.current >= a.target;
+                const bCompleted = b.current >= b.target;
+                return aCompleted - bCompleted;
+            });
+
+            container.innerHTML = sortedGoals.map(g => {
+                const isCompleted = g.current >= g.target;
                 const percent = Math.min(100, Math.round((g.current / g.target) * 100));
                 
                 const historyItems = (g.history && g.history.length > 0) 
-                    ? g.history.map(h => `
-                        <div class="list-item" style="padding: 5px 0;">
-                            <span class="item-sub">${new Date(h.date).toLocaleDateString('ru-RU')}</span>
-                            <span class="amount-income">+${h.amount.toLocaleString()} ${curr}</span>
-                        </div>
-                    `).join('')
+                    ? g.history.map(h => {
+                        const d = new Date(h.date);
+                        const dateStr = d.toLocaleDateString('ru-RU');
+                        const timeStr = d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+                        return `
+                            <div class="list-item" style="padding: 5px 0;">
+                                <span class="item-sub">${dateStr} в ${timeStr}</span>
+                                <span class="amount-income">+${h.amount.toLocaleString()} ${curr}</span>
+                            </div>
+                        `;
+                    }).join('')
                     : '<div class="item-sub">Пополнений еще не было</div>';
 
+                const statusBadge = isCompleted 
+                    ? `<div class="goal-status-container">
+                         <span>100%</span>
+                         <div class="goal-check-badge">✓</div>
+                       </div>` 
+                    : `<span>${percent}%</span>`;
+
+                const depositBtn = isCompleted
+                    ? `<div style="font-size: 13px; color: #2ec4b6; font-weight: bold; margin-top: 8px; text-align: center;">🎉 Цель успешно достигнута!</div>`
+                    : `<button class="btn btn-primary" style="margin-top: 8px;" onclick="promptDepositGoal(${g.id})">Пополнить цель</button>`;
+
                 return `
-                    <div class="card">
+                    <div class="card ${isCompleted ? 'completed-goal' : ''}">
                         <div class="card-title">
                             <span>🎯 ${g.title}</span>
-                            <span>${percent}%</span>
+                            ${statusBadge}
                         </div>
                         <div style="font-size: 13px; color: var(--hint-color);">
                             Накоплено ${g.current.toLocaleString()} из ${g.target.toLocaleString()} ${curr}
@@ -988,7 +1189,7 @@
                         <div class="progress-bar-bg">
                             <div class="progress-bar-fill" style="width: ${percent}%;"></div>
                         </div>
-                        <button class="btn btn-primary" style="margin-top: 8px;" onclick="promptDepositGoal(${g.id})">Пополнить цель</button>
+                        ${depositBtn}
                         
                         <button class="toggle-history-btn" onclick="toggleGoalHistory(${g.id})">
                             📜 История пополнений цели (${g.history ? g.history.length : 0})
@@ -1001,12 +1202,41 @@
             }).join('');
         }
 
-        /* Статистика */
+        /* Статистика и Выбор периода */
         function setPeriod(period, btn) {
             currentPeriod = period;
             document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
+            if (btn) btn.classList.add('active');
+            document.getElementById('stat-period-title').innerText = 'Обзор за период';
             triggerVibration();
+            renderStats();
+        }
+
+        function openCustomPeriodModal() {
+            openModal('modal-custom-period');
+        }
+
+        function applyCustomPeriod() {
+            const startInput = document.getElementById('period-start-date').value;
+            const endInput = document.getElementById('period-end-date').value;
+
+            if (!startInput || !endInput) return;
+
+            customStartDate = new Date(startInput);
+            customStartDate.setHours(0,0,0,0);
+
+            customEndDate = new Date(endInput);
+            customEndDate.setHours(23,59,59,999);
+
+            currentPeriod = 'custom';
+            document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.period-btn')[4].classList.add('active');
+
+            const sStr = customStartDate.toLocaleDateString('ru-RU');
+            const eStr = customEndDate.toLocaleDateString('ru-RU');
+            document.getElementById('stat-period-title').innerText = `Период: ${sStr} — ${eStr}`;
+
+            closeActiveModal();
             renderStats();
         }
 
@@ -1023,20 +1253,20 @@
                     return tDate >= weekAgo;
                 } else if (currentPeriod === 'month') {
                     return tDate.getMonth() === now.getMonth() && tDate.getFullYear() === now.getFullYear();
+                } else if (currentPeriod === 'custom' && customStartDate && customEndDate) {
+                    return tDate >= customStartDate && tDate <= customEndDate;
                 }
                 return true;
             });
 
             let income = 0;
             let expense = 0;
-            let categories = {};
 
             filtered.forEach(t => {
                 if (t.type === 'income') {
                     income += t.amount;
                 } else {
                     expense += t.amount;
-                    categories[t.category] = (categories[t.category] || 0) + t.amount;
                 }
             });
 
@@ -1044,23 +1274,24 @@
             document.getElementById('stat-expense').innerText = `-${expense.toLocaleString()} ${curr}`;
 
             const catList = document.getElementById('category-stats-list');
-            const catKeys = Object.keys(categories);
 
-            if (catKeys.length === 0) {
-                catList.innerHTML = '<div style="text-align: center; color: var(--hint-color); padding: 10px;">За этот период расходов не было</div>';
+            if (filtered.length === 0) {
+                catList.innerHTML = '<div style="text-align: center; color: var(--hint-color); padding: 10px;">За этот период операций не было</div>';
                 return;
             }
 
-            catList.innerHTML = catKeys.map(cat => {
-                const amt = categories[cat];
-                const pct = expense > 0 ? Math.round((amt / expense) * 100) : 0;
+            catList.innerHTML = filtered.map(t => {
+                const isIncome = t.type === 'income';
+                const dateStr = new Date(t.date).toLocaleDateString('ru-RU');
                 return `
                     <div class="list-item">
                         <div class="item-info">
-                            <span class="item-title">${cat}</span>
-                            <span class="item-sub">${pct}% от всех расходов</span>
+                            <span class="item-title">${t.category}</span>
+                            <span class="item-sub">${dateStr}${t.comment ? ' • ' + t.comment : ''}</span>
                         </div>
-                        <span class="item-amount amount-expense">-${amt.toLocaleString()} ${curr}</span>
+                        <span class="item-amount ${isIncome ? 'amount-income' : 'amount-expense'}">
+                            ${isIncome ? '+' : '-'}${t.amount.toLocaleString()} ${curr}
+                        </span>
                     </div>
                 `;
             }).join('');
