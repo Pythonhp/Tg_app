@@ -466,6 +466,7 @@
             margin-top: 6px;
         }
 
+        /* Выбор цвета с тонкой белой обводкой при выборе */
         .color-picker-grid {
             display: flex;
             gap: 10px;
@@ -478,13 +479,70 @@
             border-radius: 50%;
             cursor: pointer;
             border: 2px solid transparent;
+            box-sizing: border-box;
+            transition: border-color 0.2s, transform 0.1s;
         }
 
         .color-circle.active {
-            border-color: #ffffff;
+            border: 2px solid #ffffff !important;
+            transform: scale(1.08);
         }
 
-        /* Стили для раздела О приложении / Обучения */
+        /* Стили калькулятора */
+        .calc-display {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 15px 18px;
+            font-size: 28px;
+            font-weight: bold;
+            text-align: right;
+            margin-bottom: 15px;
+            word-break: break-all;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            color: #ffffff;
+        }
+
+        .calc-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .calc-btn {
+            padding: 16px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 12px;
+            border: none;
+            background: rgba(255, 255, 255, 0.08);
+            color: #ffffff;
+            cursor: pointer;
+            transition: background 0.15s, transform 0.1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .calc-btn:active {
+            transform: scale(0.95);
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .calc-btn.operator {
+            background: rgba(255, 255, 255, 0.15);
+            color: var(--income-color);
+        }
+
+        .calc-btn.equals {
+            background-color: var(--accent-color);
+            color: var(--accent-text);
+        }
+
+        /* Обучение */
         .tutorial-step {
             display: flex;
             flex-direction: column;
@@ -566,6 +624,9 @@
             </div>
             <div class="sidebar-item" onclick="switchPage('stats', this)">
                 <span>📊</span> <span>Статистика</span>
+            </div>
+            <div class="sidebar-item" onclick="switchPage('calc', this)">
+                <span>🧮</span> <span>Калькулятор</span>
             </div>
             <div class="sidebar-item" onclick="switchPage('custom', this)">
                 <span>⚙️</span> <span>Настройки</span>
@@ -655,6 +716,39 @@
             <div class="card-title">Расходы по операциям</div>
             <div id="category-stats-list">
                 <div style="text-align: center; color: var(--hint-color); padding: 10px;">Нет данных</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Раздел Калькулятор -->
+    <div id="page-calc" class="page">
+        <div class="card">
+            <div class="card-title">Калькулятор</div>
+            <div class="calc-display" id="calc-display">0</div>
+            <div class="calc-grid">
+                <button class="calc-btn operator" onclick="calcClear()">C</button>
+                <button class="calc-btn operator" onclick="calcToggleSign()">+/-</button>
+                <button class="calc-btn operator" onclick="calcPercent()">%</button>
+                <button class="calc-btn operator" onclick="calcOperator('/')">÷</button>
+
+                <button class="calc-btn" onclick="calcNum('7')">7</button>
+                <button class="calc-btn" onclick="calcNum('8')">8</button>
+                <button class="calc-btn" onclick="calcNum('9')">9</button>
+                <button class="calc-btn operator" onclick="calcOperator('*')">×</button>
+
+                <button class="calc-btn" onclick="calcNum('4')">4</button>
+                <button class="calc-btn" onclick="calcNum('5')">5</button>
+                <button class="calc-btn" onclick="calcNum('6')">6</button>
+                <button class="calc-btn operator" onclick="calcOperator('-')">-</button>
+
+                <button class="calc-btn" onclick="calcNum('1')">1</button>
+                <button class="calc-btn" onclick="calcNum('2')">2</button>
+                <button class="calc-btn" onclick="calcNum('3')">3</button>
+                <button class="calc-btn operator" onclick="calcOperator('+')">+</button>
+
+                <button class="calc-btn" style="grid-column: span 2;" onclick="calcNum('0')">0</button>
+                <button class="calc-btn" onclick="calcDot()">.</button>
+                <button class="calc-btn equals" onclick="calcEquals()">=</button>
             </div>
         </div>
     </div>
@@ -864,6 +958,12 @@
         let customStartDate = null;
         let customEndDate = null;
 
+        /* Калькулятор Переменные */
+        let calcVal = '0';
+        let calcPrev = null;
+        let calcOp = null;
+        let calcResetNext = false;
+
         function loadData() {
             const saved = localStorage.getItem('piggy_app_data_v4');
             if (saved) {
@@ -956,10 +1056,17 @@
                 document.getElementById('selected-currency-text').innerText = state.settings.currencyText;
             }
 
-            // Обновляем выделение активного цвета
+            // Аккуратное выделение выбранного цвета тонкой белой обводкой
             document.querySelectorAll('.color-circle').forEach(c => {
-                if (c.style.background === state.settings.accentColor || 
-                   (c.style.background.includes('36, 130, 50') && state.settings.accentColor === '#248232')) {
+                const bg = c.style.background;
+                const isMatch = bg === state.settings.accentColor || 
+                               (bg.includes('36, 130, 50') && state.settings.accentColor === '#248232') ||
+                               (bg.includes('0, 136, 204') && state.settings.accentColor === '#0088cc') ||
+                               (bg.includes('108, 92, 231') && state.settings.accentColor === '#6c5ce7') ||
+                               (bg.includes('255, 118, 117') && state.settings.accentColor === '#ff7675') ||
+                               (bg.includes('253, 203, 110') && state.settings.accentColor === '#fdcb6e');
+
+                if (isMatch) {
                     c.classList.add('active');
                 } else {
                     c.classList.remove('active');
@@ -1009,7 +1116,6 @@
             closeActiveModal();
             triggerVibration();
             
-            // Возврат на главную страницу
             switchPage('home', document.querySelectorAll('.sidebar-item')[0]);
         }
 
@@ -1106,7 +1212,7 @@
             }).join('');
         }
 
-        /* Цели (Лимит 10 штук + Завершение) */
+        /* Цели */
         function createGoal() {
             const limitMsg = document.getElementById('goal-limit-msg');
             
@@ -1263,7 +1369,7 @@
             }).join('');
         }
 
-        /* Статистика и Выбор периода */
+        /* Статистика */
         function setPeriod(period, btn) {
             currentPeriod = period;
             document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
@@ -1356,6 +1462,87 @@
                     </div>
                 `;
             }).join('');
+        }
+
+        /* Логика Калькулятора */
+        function calcUpdateDisplay() {
+            document.getElementById('calc-display').innerText = calcVal;
+        }
+
+        function calcNum(n) {
+            triggerVibration();
+            if (calcVal === '0' || calcResetNext) {
+                calcVal = n;
+                calcResetNext = false;
+            } else {
+                if (calcVal.length < 12) calcVal += n;
+            }
+            calcUpdateDisplay();
+        }
+
+        function calcDot() {
+            triggerVibration();
+            if (calcResetNext) {
+                calcVal = '0.';
+                calcResetNext = false;
+            } else if (!calcVal.includes('.')) {
+                calcVal += '.';
+            }
+            calcUpdateDisplay();
+        }
+
+        function calcClear() {
+            triggerVibration();
+            calcVal = '0';
+            calcPrev = null;
+            calcOp = null;
+            calcResetNext = false;
+            calcUpdateDisplay();
+        }
+
+        function calcToggleSign() {
+            triggerVibration();
+            if (calcVal !== '0') {
+                if (calcVal.startsWith('-')) calcVal = calcVal.slice(1);
+                else calcVal = '-' + calcVal;
+            }
+            calcUpdateDisplay();
+        }
+
+        function calcPercent() {
+            triggerVibration();
+            calcVal = String(parseFloat(calcVal) / 100);
+            calcUpdateDisplay();
+        }
+
+        function calcOperator(op) {
+            triggerVibration();
+            if (calcOp && !calcResetNext) {
+                calcEquals();
+            }
+            calcPrev = parseFloat(calcVal);
+            calcOp = op;
+            calcResetNext = true;
+        }
+
+        function calcEquals() {
+            triggerVibration();
+            if (calcOp === null || calcPrev === null) return;
+            const current = parseFloat(calcVal);
+            let res = 0;
+
+            switch (calcOp) {
+                case '+': res = calcPrev + current; break;
+                case '-': res = calcPrev - current; break;
+                case '*': res = calcPrev * current; break;
+                case '/': res = current !== 0 ? calcPrev / current : 'Ошибка'; break;
+            }
+
+            calcVal = String(res);
+            calcOp = null;
+            calcPrev = null;
+            calcResetNext = true;
+            calcUpdateDisplay();
         }
 
         loadData();
